@@ -1,0 +1,22 @@
+{
+  "name": "stardew-valley-desafio-todos-os-itens",
+  "version": "1.0.0",
+  "description": "Ferramenta web para carregar save de Stardew Valley e rastrear itens em baús e inventário para o desafio de pegar todos os itens.",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve -l 3000 .",
+    "generate-data": "node scratch/generate-final-html.js"
+  },
+  "keywords": [
+    "stardew-valley",
+    "save-file",
+    "items-tracker",
+    "all-items-challenge",
+    "github-pages"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "stardew-valley-data": "^1.1.1"
+  }
+}

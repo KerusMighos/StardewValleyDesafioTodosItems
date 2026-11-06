@@ -1,0 +1,1789 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stardew Valley • Desafio de Todos os Itens</title>
+  
+  <!-- Favicon & Fonts -->
+  <link rel="icon" href="https://cdn.jsdelivr.net/npm/stardew-valley-data@1.1.1/images/crops/parsnip/crop.png" type="image/png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-wood-dark: #2c1a0e;
+      --bg-wood-mid: #4a2e1b;
+      --bg-wood-light: #6a4327;
+      --bg-parchment: #fdf6e2;
+      --bg-parchment-card: #fffdf7;
+      --border-wood: #8e5831;
+      --border-dark: #22140a;
+      
+      --sv-gold: #f5a623;
+      --sv-gold-light: #ffd152;
+      --sv-green: #2ecc71;
+      --sv-green-dark: #27ae60;
+      --sv-red: #e74c3c;
+      --sv-red-light: #ff7675;
+      --sv-blue: #3498db;
+      --sv-purple: #9b59b6;
+      
+      --text-dark: #3b2616;
+      --text-muted: #795548;
+      --text-light: #fdf6e2;
+      
+      --shadow-pixel: 0 4px 0 #1b1008;
+      --radius-sv: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background-color: var(--bg-wood-dark);
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(142, 88, 49, 0.4) 0%, transparent 70%),
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.08) 0px, rgba(0,0,0,0.08) 2px, transparent 2px, transparent 8px);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .font-pixel {
+      font-family: 'Press Start 2P', monospace;
+    }
+    
+    .font-subpixel {
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      background: linear-gradient(180deg, #442714 0%, #2c1a0e 100%);
+      border-bottom: 4px solid var(--border-wood);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.5);
+      padding: 24px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .header-logo img {
+      width: 48px;
+      height: 48px;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+    }
+
+    .header-title h1 {
+      font-size: 1.15rem;
+      color: var(--sv-gold-light);
+      text-shadow: 2px 2px 0 #1b1008;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    }
+
+    .header-title p {
+      color: #e5c890;
+      font-size: 0.85rem;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    .header-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .badge-pill {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border-wood);
+      color: #ffd152;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    main {
+      flex: 1;
+      padding: 30px 0 60px 0;
+    }
+
+    .wood-box {
+      background: var(--bg-wood-mid);
+      border: 4px solid var(--border-wood);
+      border-radius: var(--radius-sv);
+      box-shadow: var(--shadow-pixel), 0 8px 24px rgba(0,0,0,0.4);
+      padding: 20px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .parchment-box {
+      background: var(--bg-parchment);
+      border: 3px solid var(--border-wood);
+      border-radius: 10px;
+      padding: 24px;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .upload-card {
+      border: 3px dashed #a7744b;
+      background: rgba(253, 246, 226, 0.95);
+      border-radius: 12px;
+      padding: 36px 20px;
+      text-align: center;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+
+    .upload-card:hover, .upload-card.dragover {
+      border-color: var(--sv-gold);
+      background: #fffdf7;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+    .upload-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 16px auto;
+      image-rendering: pixelated;
+      filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+    }
+
+    .upload-title {
+      font-size: 1.15rem;
+      color: var(--text-dark);
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .upload-desc {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.5;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .btn {
+      font-family: 'Fredoka', cursive, sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 10px 22px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      outline: none;
+      border: 2px solid;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #f5a623 0%, #d48310 100%);
+      color: #3b2616;
+      border-color: #9c5c07;
+      box-shadow: 0 3px 0 #7a4604;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #ffb845 0%, #e08e16 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #7a4604;
+    }
+
+    .btn-demo {
+      background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
+      color: white;
+      border-color: #1b7943;
+      box-shadow: 0 3px 0 #145931;
+    }
+
+    .btn-demo:hover {
+      background: linear-gradient(180deg, #44df85 0%, #2db867 100%);
+      transform: translateY(-1px);
+    }
+
+    .btn-demo:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #145931;
+    }
+
+    .btn-outline {
+      background: white;
+      color: var(--text-dark);
+      border-color: var(--border-wood);
+      box-shadow: 0 2px 0 var(--border-wood);
+    }
+
+    .btn-outline:hover {
+      background: #fdf6e2;
+    }
+
+    .save-help-toggle {
+      color: #6a4327;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: underline;
+      cursor: pointer;
+      margin-top: 18px;
+      display: inline-block;
+    }
+
+    .save-help-content {
+      display: none;
+      background: rgba(0,0,0,0.06);
+      border: 1px solid var(--border-wood);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 14px;
+      color: var(--text-dark);
+      font-size: 0.85rem;
+      text-align: left;
+      line-height: 1.6;
+    }
+
+    .save-help-content code {
+      background: white;
+      border: 1px solid #d8be9b;
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #8e5831;
+      font-family: monospace;
+      font-weight: bold;
+    }
+
+    #farmer-dashboard {
+      display: none;
+    }
+
+    .farmer-profile {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px dashed rgba(142, 88, 49, 0.4);
+    }
+
+    .farmer-details {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .farmer-avatar {
+      width: 56px;
+      height: 56px;
+      background: #e5c890;
+      border: 3px solid var(--border-wood);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+
+    .farmer-meta h2 {
+      font-size: 1.3rem;
+      color: var(--text-dark);
+      font-weight: 800;
+    }
+
+    .farmer-meta p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .farmer-stats-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .stat-pill {
+      background: white;
+      border: 2px solid var(--border-wood);
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-dark);
+      box-shadow: 0 2px 0 rgba(0,0,0,0.06);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .progress-section {
+      margin-bottom: 24px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8px;
+    }
+
+    .progress-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .progress-pct {
+      font-family: 'Fredoka', cursive, sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--sv-green-dark);
+    }
+
+    .progress-bar-bg {
+      background: #e2d1b3;
+      border: 3px solid var(--border-wood);
+      height: 28px;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #2ecc71 0%, #27ae60 50%, #f1c40f 100%);
+      height: 100%;
+      width: 0%;
+      border-radius: 10px;
+      transition: width 1s cubic-bezier(0.25, 1, 0.5, 1);
+      box-shadow: 0 1px 0 rgba(255,255,255,0.4) inset;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .stat-box {
+      background: white;
+      border: 2px solid var(--border-wood);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+    }
+
+    .stat-box-val {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      font-family: 'Fredoka', cursive, sans-serif;
+    }
+
+    .stat-box-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+    }
+
+    .category-section-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin: 20px 0 12px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .cat-card {
+      background: white;
+      border: 2px solid var(--border-wood);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 0 rgba(0,0,0,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 12px rgba(0,0,0,0.12);
+      border-color: var(--sv-gold);
+    }
+
+    .cat-card.active {
+      border-color: var(--sv-gold);
+      background: #fffdf5;
+      box-shadow: 0 0 0 2px var(--sv-gold);
+    }
+
+    .cat-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .cat-name {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cat-count {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .cat-progress-bg {
+      background: #eee;
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+      margin-top: 6px;
+    }
+
+    .cat-progress-fill {
+      height: 100%;
+      background: var(--sv-green);
+      transition: width 0.6s ease;
+    }
+
+    .filters-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px;
+      background: #f5edd7;
+      border: 2px solid var(--border-wood);
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .filter-tab {
+      background: white;
+      border: 2px solid var(--border-wood);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: var(--text-dark);
+      transition: all 0.15s ease;
+    }
+
+    .filter-tab:hover {
+      background: #fdf6e2;
+    }
+
+    .filter-tab.active {
+      background: var(--sv-gold);
+      color: #2c1a0e;
+      border-color: #a06306;
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.4);
+    }
+
+    .search-input-wrap {
+      position: relative;
+      flex: 1;
+      min-width: 200px;
+      max-width: 320px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 32px;
+      border: 2px solid var(--border-wood);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      outline: none;
+      background: white;
+    }
+
+    .search-input:focus {
+      border-color: var(--sv-gold);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #9c7a5f;
+      font-size: 0.85rem;
+      pointer-events: none;
+    }
+
+    .select-wrap select {
+      padding: 8px 12px;
+      border: 2px solid var(--border-wood);
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      outline: none;
+      background: white;
+      cursor: pointer;
+    }
+
+    .items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .item-card {
+      background: white;
+      border: 2px solid var(--border-wood);
+      border-radius: 10px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 3px 0 rgba(0,0,0,0.06);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .item-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+      border-color: var(--sv-gold);
+    }
+
+    .item-card.is-owned {
+      border-left: 5px solid var(--sv-green);
+    }
+
+    .item-card.is-missing {
+      border-left: 5px solid var(--sv-red-light);
+      background: #fffcfc;
+    }
+
+    .item-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .item-icon-box {
+      width: 48px;
+      height: 48px;
+      min-width: 48px;
+      background: #fdf6e2;
+      border: 2px solid var(--border-wood);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .item-icon {
+      width: 36px;
+      height: 36px;
+      image-rendering: pixelated;
+      object-fit: contain;
+    }
+
+    .item-main-info {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .item-name {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-category-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #795548;
+      background: #f5edd7;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 2px;
+    }
+
+    .item-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px dashed #eedbc5;
+      padding-top: 8px;
+      font-size: 0.8rem;
+    }
+
+    .status-badge {
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-badge.owned {
+      background: #e8f8f0;
+      color: #1e824c;
+      border: 1px solid #a2e0be;
+    }
+
+    .status-badge.missing {
+      background: #fdf0ed;
+      color: #c0392b;
+      border: 1px solid #f5b7b1;
+    }
+
+    .item-price {
+      font-weight: 700;
+      color: #b7791f;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .item-locations-tooltip {
+      font-size: 0.72rem;
+      color: #666;
+      background: #f8f9fa;
+      border-radius: 4px;
+      padding: 4px 6px;
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(3px);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: var(--bg-parchment);
+      border: 4px solid var(--border-wood);
+      border-radius: 14px;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+      overflow: hidden;
+      animation: modalPop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes modalPop {
+      0% { transform: scale(0.9); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-header {
+      background: linear-gradient(180deg, #442714 0%, #2c1a0e 100%);
+      color: #ffd152;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--border-wood);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #ffd152;
+      font-size: 1.5rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-body {
+      padding: 24px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .modal-item-hero {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 2px dashed #e2cfb7;
+    }
+
+    .modal-item-img {
+      width: 64px;
+      height: 64px;
+      image-rendering: pixelated;
+      background: white;
+      border: 2px solid var(--border-wood);
+      border-radius: 10px;
+      padding: 6px;
+      object-fit: contain;
+    }
+
+    .locations-list {
+      margin-top: 12px;
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .locations-list li {
+      background: white;
+      border: 1px solid #e2cfb7;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer {
+      background: #1e1109;
+      color: #a78871;
+      padding: 24px 0;
+      border-top: 3px solid var(--border-wood);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--sv-gold-light);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #27ae60;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+      animation: toastIn 0.3s ease;
+    }
+
+    @keyframes toastIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="container header-content">
+      <div class="header-logo">
+        <img src="https://cdn.jsdelivr.net/npm/stardew-valley-data@1.1.1/images/crops/parsnip/crop.png" alt="Stardew Valley Logo">
+        <div class="header-title">
+          <h1 class="font-pixel">STARDEW VALLEY • ALL ITEMS TRACKER</h1>
+          <p>Desafio de Pegar Todos os Itens: Analisador de Baús & Inventário</p>
+        </div>
+      </div>
+      <div class="header-badges">
+        <span class="badge-pill">🌾 Compatível 1.6</span>
+        <span class="badge-pill">🔒 100% Local no Navegador</span>
+        <span class="badge-pill">🚀 GitHub Pages Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <div class="container">
+
+      <!-- Upload / Dropzone Card -->
+      <div class="wood-box">
+        <div class="upload-card" id="dropzone">
+          <img class="upload-icon" src="https://cdn.jsdelivr.net/npm/stardew-valley-data@1.1.1/images/craftable/storage/Chest.png" alt="Baú de Stardew Valley" onerror="this.src='https://cdn.jsdelivr.net/npm/stardew-valley-data@1.1.1/images/crops/parsnip/crop.png'">
+          <h2 class="upload-title font-subpixel">Carregue o Arquivo de Save da sua Fazenda</h2>
+          <p class="upload-desc">
+            Arraste seu arquivo de save aqui ou selecione do seu computador. Todos os seus baús, inventário, geladeiras e equipamentos serão analisados localmente sem sair da sua máquina!
+          </p>
+
+          <div class="btn-group">
+            <label class="btn btn-primary">
+              📁 Selecionar Arquivo de Save
+              <input type="file" id="save-file-input" style="display:none;">
+            </label>
+            <button class="btn btn-demo" id="btn-load-demo">
+              🌾 Carregar Save de Teste (MiniFazenda)
+            </button>
+          </div>
+
+          <div>
+            <span class="save-help-toggle" id="toggle-help">Onde encontro o arquivo de save do Stardew Valley? ▼</span>
+            <div class="save-help-content" id="help-box">
+              <p>O arquivo de save fica em uma pasta com o nome da sua fazenda e números (ex: <code>MiniFazenda_450568833</code>):</p>
+              <ul style="margin-left: 20px; margin-top: 6px;">
+                <li><strong>Windows:</strong> Pressione <code>Win + R</code>, digite <code>%AppData%\StardewValley\Saves</code> e aperte Enter.</li>
+                <li><strong>Mac:</strong> <code>~/.config/StardewValley/Saves</code></li>
+                <li><strong>Linux:</strong> <code>~/.config/StardewValley/Saves</code></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Farmer & Challenge Dashboard (Populated after load) -->
+      <div id="farmer-dashboard">
+        
+        <!-- Farmer Info Banner -->
+        <div class="wood-box parchment-box">
+          <div class="farmer-profile">
+            <div class="farmer-details">
+              <div class="farmer-avatar" id="farmer-avatar-icon">👨‍🌾</div>
+              <div class="farmer-meta">
+                <h2 id="farmer-name-display">KerusMighos</h2>
+                <p id="farm-name-display">Fazenda MiniFazenda</p>
+              </div>
+            </div>
+            <div class="farmer-stats-pill-group">
+              <div class="stat-pill">📅 <span id="farmer-date-display">Verão 22, Ano 2</span></div>
+              <div class="stat-pill">💰 <span id="farmer-gold-display">359.041g</span></div>
+              <div class="stat-pill">📦 <span id="farmer-chests-display">25 Baús / Contêineres</span></div>
+              <div class="stat-pill">🏷️ Versão: <span id="farmer-version-display">1.6.15</span></div>
+            </div>
+          </div>
+
+          <!-- Progress Bar Section -->
+          <div class="progress-section">
+            <div class="progress-header">
+              <div class="progress-title font-subpixel">🏆 Progresso Geral do Desafio de Todos os Itens</div>
+              <div class="progress-pct" id="overall-percentage">0%</div>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="overall-progress-bar"></div>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-box">
+                <div class="stat-box-val" id="stat-total-catalog">1030</div>
+                <div class="stat-box-label">Total de Itens</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-val" style="color:var(--sv-green-dark);" id="stat-owned-count">0</div>
+                <div class="stat-box-label">Coletados (Baús/Inv)</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-val" style="color:var(--sv-red);" id="stat-missing-count">0</div>
+                <div class="stat-box-label">Faltam Pegar</div>
+              </div>
+              <div class="stat-box">
+                <div class="stat-box-val" style="color:var(--sv-gold);" id="stat-total-stored-qty">0</div>
+                <div class="stat-box-label">Unidades Armazenadas</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Category Progress Cards Grid -->
+          <div class="category-section-title font-subpixel">
+            <span>🏷️ Progresso por Categorias (Clique para filtrar)</span>
+            <button class="btn btn-outline" style="font-size:0.75rem; padding: 4px 10px;" id="btn-reset-cat">Limpar Filtro</button>
+          </div>
+          <div class="categories-grid" id="categories-grid">
+            <!-- Dynamically populated -->
+          </div>
+
+        </div>
+
+        <!-- Filters & Item Explorer -->
+        <div class="wood-box parchment-box">
+          <div class="filters-bar">
+            <!-- Status Tabs -->
+            <div class="filter-tabs" id="status-tabs">
+              <button class="filter-tab active" data-status="missing">❌ Faltando (<span id="tab-missing-count">0</span>)</button>
+              <button class="filter-tab" data-status="all">🌟 Todos (<span id="tab-all-count">0</span>)</button>
+              <button class="filter-tab" data-status="owned">✅ Coletados (<span id="tab-owned-count">0</span>)</button>
+            </div>
+
+            <!-- Search input -->
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="search-input" class="search-input" placeholder="Buscar por nome ou categoria...">
+            </div>
+
+            <!-- Scope and Sort Selectors -->
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <div class="select-wrap">
+                <select id="scope-select">
+                  <option value="all">🌐 Desafio Completo (Todos)</option>
+                  <option value="collections">🏆 Apenas Coleções Oficiais</option>
+                </select>
+              </div>
+
+              <div class="select-wrap">
+                <select id="sort-select">
+                  <option value="name-asc">Nome (A-Z)</option>
+                  <option value="name-desc">Nome (Z-A)</option>
+                  <option value="category">Categoria</option>
+                  <option value="price-desc">Preço de Venda (Maior)</option>
+                  <option value="qty-desc">Quantidade Guardada</option>
+                </select>
+              </div>
+
+              <button class="btn btn-outline" id="btn-copy-missing" title="Copiar lista de itens faltantes formatada em texto para o Bloco de Notas / Discord">
+                📋 Copiar Faltantes
+              </button>
+
+              <button class="btn btn-outline" id="btn-export-csv" title="Baixar relatório completo em planilha CSV">
+                💾 Exportar CSV
+              </button>
+            </div>
+          </div>
+
+          <!-- Items Grid -->
+          <div class="items-grid" id="items-grid">
+            <!-- Dynamically populated -->
+          </div>
+
+          <div class="empty-state" id="empty-state" style="display:none;">
+            Nenhum item encontrado com os filtros atuais.
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Modal Item Details -->
+  <div class="modal-overlay" id="item-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="font-pixel" style="font-size:0.9rem;" id="modal-item-name">Detalhes do Item</h3>
+        <button class="modal-close" id="modal-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-item-hero">
+          <img class="modal-item-img" id="modal-item-img" src="" alt="">
+          <div>
+            <h2 id="modal-title" style="font-size:1.2rem; font-weight:800; color:var(--text-dark);"></h2>
+            <div style="margin-top:4px;" id="modal-badges"></div>
+          </div>
+        </div>
+        <div id="modal-details-body"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast">Copiado com sucesso!</div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>Desenvolvido para a comunidade de <strong>Stardew Valley</strong> • Dados e Imagens providos por <a href="https://github.com/chiefpansancolt/stardew-valley-data" target="_blank" rel="noopener">stardew-valley-data</a></p>
+      <p style="margin-top:6px; font-size:0.75rem; opacity:0.8;">Stardew Valley é uma marca registrada de ConcernedApe. Esta ferramenta é open-source e não é afiliada à ConcernedApe.</p>
+    </div>
+  </footer>
+
+  <!-- Compact Dataset Generated from stardew-valley-data -->
+  <script>
+    const RAW_CATALOG = [["40","Abby's Planchette","Armas","weapons/daggers/Abby's Planchette.png",200,0],["AbigailsBow","Abigail's Bow","Chapéus","hats/Abigail's Bow.png",-1,0],["309","Acorn","Sementes & Mudas","trees/oak/seed.png",-1,0],["541","Aerinite","Minerais & Gemas","minerals/geode-minerals/Aerinite.png",125,0],["447","Aged Roe","Produtos Artesanais","artisan-goods/Aged Roe.png",-1,0],["538","Alamite","Minerais & Gemas","minerals/geode-minerals/Alamite.png",150,0],["705","Albacore","Peixes","fish/Albacore.png",75,0],["25","Alex's Bat","Armas","weapons/clubs/Alex's Bat.png",350,0],["456","Algae Soup","Culinária","cooking/Algae Soup.png",100,0],["300","Amaranth","Culturas & Fazenda","crops/amaranth/crop.png",150,0],["299","Amaranth Seeds","Sementes & Mudas","crops/amaranth/seed.png",35,0],["66","Amethyst","Minerais & Gemas","minerals/gems/Amethyst.png",100,0],["amethyst-node","Amethyst Node","Minerais & Gemas","minerals/nodes/Amethyst Node.png",-1,0],["529","Amethyst Ring","Anéis","rings/Amethyst Ring.png",100,0],["587","Amphibian Fossil","Artefatos","artifacts/Amphibian Fossil.png",150,0],["117","Anchor","Artefatos","artifacts/Anchor.png",100,0],["129","Anchovy","Peixes","fish/Anchovy.png",30,0],["103","Ancient Doll","Artefatos","artifacts/Ancient Doll.png",60,0],["123","Ancient Drum","Artefatos","artifacts/Ancient Drum.png",100,0],["454","Ancient Fruit","Culturas & Fazenda","crops/ancient-fruit/crop.png",550,0],["114","Ancient Seed","Artefatos","artifacts/Ancient Seed.png",5,0],["Ancient Seeds","Ancient Seeds","Criação (Crafting)","craftable/seeds/Ancient Seeds.png",30,0],["109","Ancient Sword","Artefatos","artifacts/Ancient Sword.png",100,0],["160","Angler","Peixes","fish/Angler.png",900,0],["AnimalCatalogue","Animal Catalogue","Itens Especiais","special-items/Animal Catalogue.png",-1,0],["Anvil","Anvil","Criação (Crafting)","craftable/misc/Anvil.png",-1,0],["613","Apple","Culturas & Fazenda","trees/apple/crop.png",100,0],["633","Apple Tree","Outros Itens","trees/apple/harvest.png",-1,0],["634","Apricot","Culturas & Fazenda","trees/apricot/crop.png",50,0],["629","Apricot Tree","Outros Itens","trees/apricot/harvest.png",-1,0],["62","Aquamarine","Minerais & Gemas","minerals/gems/Aquamarine.png",180,0],["aquamarine-node","Aquamarine Node","Minerais & Gemas","minerals/nodes/Aquamarine Node.png",-1,0],["531","Aquamarine Ring","Anéis","rings/Aquamarine Ring.png",200,0],["60","Arcane Hat","Chapéus","hats/Arcane Hat.png",-1,0],["35","Archer's Cap","Chapéus","hats/Archer's Cap.png",4000,0],["101","Arrowhead","Artefatos","artifacts/Arrowhead.png",40,0],["274","Artichoke","Culturas & Fazenda","crops/artichoke/crop.png",160,0],["605","Artichoke Dip","Culinária","cooking/Artichoke Dip.png",210,0],["489","Artichoke Seeds","Sementes & Mudas","crops/artichoke/seed.png",15,0],["275","Artifact Trove","Minerais & Gemas","minerals/geodes/Artifact Trove.png",0,0],["auto-grabber","Auto-Grabber","Ferramentas","tools/Auto-Grabber.png",-1,0],["auto-petter","Auto-Petter","Ferramentas","tools/Auto-Petter.png",-1,0],["235","Autumn's Bounty","Culinária","cooking/Autumn's Bounty.png",350,0],["axe","Axe","Ferramentas","",-1,0],["Bait","Bait","Criação (Crafting)","fish/bait/Bait.png",1,0],["BaitAndBobber","Bait And Bobber","Itens Especiais","special-items/Bait And Bobber.png",-1,0],["Bait Maker","Bait Maker","Criação (Crafting)","craftable/refining-equipment/Bait Maker.png",-1,0],["198","Baked Fish","Culinária","cooking/Baked Fish.png",100,0],["91","Banana","Culturas & Fazenda","trees/banana/crop.png",150,0],["904","Banana Pudding","Culinária","cooking/Banana Pudding.png",260,0],["69","Banana Tree","Outros Itens","trees/banana/harvest.png",-1,0],["Barbed Hook","Barbed Hook","Criação (Crafting)","fish/tackle/Barbed Hook.png",500,0],["Barrel Brazier","Barrel Brazier","Criação (Crafting)","craftable/lighting/Barrel Brazier.png",-1,0],["540","Baryte","Minerais & Gemas","minerals/geode-minerals/Baryte.png",50,0],["570","Basalt","Minerais & Gemas","minerals/geode-minerals/Basalt.png",175,0],["Basic Fertilizer","Basic Fertilizer","Criação (Crafting)","craftable/fertilizer/Basic Fertilizer.png",-1,0],["Basic Retaining Soil","Basic Retaining Soil","Criação (Crafting)","craftable/fertilizer/Basic Retaining Soil.png",-1,0],["basilisk-paw","Basilisk Paw","Bugigangas (1.6)","trinkets/Basilisk Paw.png",1000,0],["Bat","Bat","Outros Itens","monsters/Bat.png",-1,0],["767","Bat Wing","Espólios de Monstros","monsters/monster-loot/Bat Wing.png",15,0],["787","Battery Pack","Forrageamento","forageables/Battery Pack.png",500,0],["207","Bean Hotpot","Culinária","cooking/Bean Hotpot.png",100,0],["473","Bean Starter","Sementes & Mudas","crops/green-bean/seed.png",30,0],["53","Beanie","Chapéus","hats/Beanie.png",-1,0],["BearPaw","Bear's Knowledge","Itens Especiais","special-items/Bear's Knowledge.png",-1,0],["Bee House","Bee House","Criação (Crafting)","craftable/artisan-equipment/Bee House.png",-1,0],["346","Beer","Produtos Artesanais","artisan-goods/Beer.png",200,0],["284","Beet","Culturas & Fazenda","crops/beet/crop.png",100,0],["494","Beet Seeds","Sementes & Mudas","crops/beet/seed.png",10,0],["Big Chest","Big Chest","Criação (Crafting)","craftable/storage/Big Chest.png",-1,0],["Big Slime","Big Slime","Outros Itens","monsters/Big Slime.png",-1,0],["Big Stone Chest","Big Stone Chest","Criação (Crafting)","craftable/storage/Big Stone Chest.png",-1,0],["539","Bixite","Minerais & Gemas","minerals/geode-minerals/Bixite.png",300,0],["410","Blackberry","Forrageamento","forageables/Blackberry.png",20,0],["611","Blackberry Cobbler","Culinária","cooking/Blackberry Cobbler.png",260,0],["800","Blobfish","Peixes","fish/Blobfish.png",500,0],["56","Blobfish Mask","Chapéus","hats/Blobfish Mask.png",-1,0],["6","Blue Bonnet","Chapéus","hats/Blue Bonnet.png",1000,0],["BlueBow","Blue Bow","Chapéus","hats/Blue Bow.png",-1,0],["blue-chicken","Blue Chicken","Outros Itens","animals/Blue Chicken.png",-1,0],["37","Blue Cowboy Hat","Chapéus","hats/Blue Cowboy Hat.png",-1,0],["838","Blue Discus","Peixes","fish/Blue Discus.png",120,0],["Blue Grass Starter","Blue Grass Starter","Criação (Crafting)","craftable/seeds/Blue Grass Starter.png",-1,0],["597","Blue Jazz","Culturas & Fazenda","crops/blue-jazz/crop.png",50,0],["BlueRibbon","Blue Ribbon","Chapéus","hats/Blue Ribbon.png",1000,0],["Blue Squid","Blue Squid","Outros Itens","monsters/Blue Squid.png",-1,0],["258","Blueberry","Culturas & Fazenda","crops/blueberry/crop.png",50,0],["481","Blueberry Seeds","Sementes & Mudas","crops/blueberry/seed.png",40,0],["234","Blueberry Tart","Culinária","cooking/Blueberry Tart.png",150,0],["80","Bluebird Mask","Chapéus","hats/Bluebird Mask.png",-1,0],["278","Bok Choy","Culturas & Fazenda","crops/bok-choy/crop.png",80,0],["491","Bok Choy Seeds","Sementes & Mudas","crops/bok-choy/seed.png",25,0],["Bomb","Bomb","Criação (Crafting)","craftable/bombs/Bomb.png",-1,0],["119","Bone Flute","Artefatos","artifacts/Bone Flute.png",100,0],["881","Bone Fragment","Minerais & Gemas","minerals/resources/Bone Fragment.png",12,0],["Bone Mill","Bone Mill","Criação (Crafting)","craftable/refining-equipment/Bone Mill.png",-1,0],["bone-node","Bone Node","Minerais & Gemas","minerals/nodes/Bone Node 1.png",-1,0],["5","Bone Sword","Armas","weapons/swords/Bone Sword.png",250,0],["Mystery","Book of Mysteries","Itens Especiais","special-items/Book of Mysteries.png",-1,0],["1","Bowler Hat","Chapéus","hats/Bowler Hat.png",10000,0],["216","Bread","Culinária","cooking/Bread.png",60,0],["132","Bream","Peixes","fish/Bream.png",45,0],["Brick Floor","Brick Floor","Criação (Crafting)","craftable/decor/Brick Floor.png",-1,0],["69","Bridal Veil","Chapéus","hats/Bridal Veil.png",-1,0],["Broccoli","Broccoli","Culturas & Fazenda","crops/broccoli/crop.png",70,0],["BroccoliSeeds","Broccoli Seeds","Sementes & Mudas","crops/broccoli/seed.png",40,0],["51","Broken Trident","Armas","weapons/daggers/Broken Trident.png",250,0],["brown-chicken","Brown Chicken","Outros Itens","animals/Brown Chicken.png",-1,0],["brown-cow","Brown Cow","Outros Itens","animals/Brown Cow.png",-1,0],["180","Brown Egg","Produtos Animais","animals/produce/Brown Egg.png",50,0],["618","Bruschetta","Culinária","cooking/Bruschetta.png",210,0],["BucketHat","Bucket Hat","Chapéus","hats/Bucket Hat.png",-1,0],["Bug","Bug","Outros Itens","monsters/Bug.png",-1,0],["684","Bug Meat","Espólios de Monstros","monsters/monster-loot/Bug Meat.png",8,0],["Bug Steak","Bug Steak","Criação (Crafting)","craftable/edible-items/Bug Steak.png",-1,0],["700","Bullhead","Peixes","fish/Bullhead.png",75,0],["526","Burglar's Ring","Anéis","rings/Burglar's Ring.png",750,0],["18","Burglar's Shank","Armas","weapons/daggers/Burglar's Shank.png",200,0],["14","Butterfly Bow","Chapéus","hats/Butterfly Bow.png",1000,0],["90","Cactus Fruit","Culturas & Fazenda","crops/cactus-fruit/crop.png",75,0],["802","Cactus Seeds","Sementes & Mudas","crops/cactus-fruit/seed.png",0,0],["542","Calcite","Minerais & Gemas","minerals/geode-minerals/Calcite.png",75,0],["calico-egg-node","Calico Egg Node","Minerais & Gemas","minerals/nodes/Calico Egg Node 1.png",-1,0],["Campfire","Campfire","Criação (Crafting)","craftable/lighting/Campfire.png",-1,0],["Carbon Ghost","Carbon Ghost","Outros Itens","monsters/Carbon Ghost.png",-1,0],["142","Carp","Peixes","fish/Carp.png",30,0],["209","Carp Surprise","Culinária","cooking/Carp Surprise.png",150,0],["Carrot","Carrot","Culturas & Fazenda","crops/carrot/crop.png",35,0],["CarrotSeeds","Carrot Seeds","Sementes & Mudas","crops/carrot/seed.png",15,0],["Carved Brazier","Carved Brazier","Criação (Crafting)","craftable/lighting/Carved Brazier.png",-1,0],["16","Carving Knife","Armas","weapons/daggers/Carving Knife.png",50,0],["Cask","Cask","Criação (Crafting)","craftable/artisan-equipment/Cask.png",-1,0],["cat-1","Cat","Outros Itens","animals/Cat 1.png",-1,0],["32","Cat Ears","Chapéus","hats/Cat Ears.png",5000,0],["143","Catfish","Peixes","fish/Catfish.png",200,0],["190","Cauliflower","Culturas & Fazenda","crops/cauliflower/crop.png",175,0],["474","Cauliflower Seeds","Sementes & Mudas","crops/cauliflower/seed.png",40,0],["78","Cave Carrot","Forrageamento","forageables/Cave Carrot.png",25,0],["Fly","Cave Fly","Outros Itens","monsters/Cave Fly.png",-1,0],["CaveJelly","Cave Jelly","Peixes","fish/jelly/Cave Jelly.png",180,0],["445","Caviar","Produtos Artesanais","artisan-goods/Caviar.png",500,0],["566","Celestine","Minerais & Gemas","minerals/geode-minerals/Celestine.png",125,0],["Challenge Bait","Challenge Bait","Criação (Crafting)","fish/bait/Challenge Bait.png",1,0],["281","Chanterelle","Forrageamento","forageables/Chanterelle.png",160,0],["Charcoal Kiln","Charcoal Kiln","Criação (Crafting)","craftable/refining-equipment/Charcoal Kiln.png",-1,0],["424","Cheese","Produtos Artesanais","artisan-goods/Cheese.png",230,0],["197","Cheese Cauliflower","Culinária","cooking/Cheese Cauliflower.png",300,0],["Cheese Press","Cheese Press","Criação (Crafting)","craftable/artisan-equipment/Cheese Press.png",-1,0],["61","Chef Hat","Chapéus","hats/Chef Hat.png",10000,0],["638","Cherry","Culturas & Fazenda","trees/cherry/crop.png",80,0],["Cherry Bomb","Cherry Bomb","Criação (Crafting)","craftable/bombs/Cherry Bomb.png",-1,0],["628","Cherry Tree","Outros Itens","trees/cherry/harvest.png",-1,0],["Chest","Chest","Criação (Crafting)","craftable/storage/Chest.png",-1,0],["105","Chewing Stick","Artefatos","artifacts/Chewing Stick.png",50,0],["10","Chicken Mask","Chapéus","hats/Chicken Mask.png",2000,0],["113","Chicken Statue","Artefatos","artifacts/Chicken Statue.png",50,0],["100","Chipped Amphora","Artefatos","artifacts/Chipped Amphora.png",40,0],["220","Chocolate Cake","Culinária","cooking/Chocolate Cake.png",200,0],["727","Chowder","Culinária","cooking/Chowder.png",135,0],["702","Chub","Peixes","fish/Chub.png",50,0],["848","Cinder Shard","Minerais & Gemas","minerals/foraged-minerals/Cinder Shard.png",50,0],["cinder-shard-node","Cinder Shard Node","Minerais & Gemas","minerals/nodes/Cinder Shard Node 1.png",-1,0],["853","Cinderclown Shoes","Calçados","footwear/Cinderclown Shoes.png",550,0],["372","Clam","Peixes","fish/Clam.png",50,0],["330","Clay","Forrageamento","forageables/Clay.png",20,0],["clay-node","Clay Node","Minerais & Gemas","minerals/nodes/Clay Node.png",-1,0],["10","Claymore","Armas","weapons/swords/Claymore.png",250,0],["428","Cloth","Produtos Artesanais","artisan-goods/Cloth.png",470,0],["ClubCard","Club Card","Itens Especiais","special-items/Club Card.png",-1,0],["382","Coal","Minerais & Gemas","minerals/ore/Coal.png",15,0],["coal-node","Coal Node","Minerais & Gemas","minerals/nodes/Coal Node 1.png",-1,0],["Cobblestone Path","Cobblestone Path","Criação (Crafting)","craftable/decor/Cobblestone Path.png",-1,0],["718","Cockle","Peixes","fish/Cockle.png",50,0],["88","Coconut","Forrageamento","forageables/Coconut.png",100,0],["395","Coffee","Produtos Artesanais","artisan-goods/Coffee.png",150,0],["433","Coffee Bean","Culturas & Fazenda","crops/coffee-bean/crop.png",15,0],["648","Coleslaw","Culinária","cooking/Coleslaw.png",345,0],["508","Combat Boots","Calçados","footwear/Combat Boots.png",150,0],["Mastery_Combat","Combat Mastery","Itens Especiais","special-items/Mastery Icon.png",-1,0],["CombatQuarterly","Combat Quarterly","Itens Especiais","special-items/Combat Quarterly.png",-1,0],["404","Common Mushroom","Forrageamento","forageables/Common Mushroom.png",40,0],["201","Complete Breakfast","Culinária","cooking/Complete Breakfast.png",350,0],["concerned-ape-hat","ConcernedApe Hat","Chapéus","hats/ConcernedApe Hat.png",-1,0],["39","Cone Hat","Chapéus","hats/Cone Hat.png",-1,0],["223","Cookie","Culinária","cooking/Cookie.png",140,0],["Cookout Kit","Cookout Kit","Criação (Crafting)","craftable/misc/Cookout Kit.png",-1,0],["20","Cool Cap","Chapéus","hats/Cool Cap.png",5000,0],["334","Copper Bar","Minerais & Gemas","minerals/bars/Copper Bar.png",60,0],["copper-node","Copper Node","Minerais & Gemas","minerals/nodes/Copper Node.png",-1,0],["378","Copper Ore","Minerais & Gemas","minerals/ore/Copper Ore.png",5,0],["copper-pan-hat","Copper Pan (hat)","Chapéus","hats/Copper Pan (hat).png",-1,0],["393","Coral","Forrageamento","forageables/Coral.png",80,0],["Cork Bobber","Cork Bobber","Criação (Crafting)","fish/tackle/Cork Bobber.png",250,0],["270","Corn","Culturas & Fazenda","crops/corn/crop.png",50,0],["487","Corn Seeds","Sementes & Mudas","crops/corn/seed.png",75,0],["515","Cowboy Boots","Calçados","footwear/Cowboy Boots.png",200,0],["0","Cowboy Hat","Chapéus","hats/Cowboy Hat.png",10000,0],["33","Cowgal Hat","Chapéus","hats/Cowgal Hat.png",5000,0],["34","Cowpoke Hat","Chapéus","hats/Cowpoke Hat.png",5000,0],["717","Crab","Peixes","fish/Crab.png",100,0],["732","Crab Cakes","Culinária","cooking/Crab Cakes.png",275,0],["Crab Pot","Crab Pot","Criação (Crafting)","craftable/fishing/Crab Pot.png",-1,0],["810","Crabshell Ring","Anéis","rings/Crabshell Ring.png",1000,0],["282","Cranberries","Culturas & Fazenda","crops/cranberries/crop.png",75,0],["612","Cranberry Candy","Culinária","cooking/Cranberry Candy.png",175,0],["238","Cranberry Sauce","Culinária","cooking/Cranberry Sauce.png",120,0],["493","Cranberry Seeds","Sementes & Mudas","crops/cranberries/seed.png",120,0],["716","Crayfish","Peixes","fish/Crayfish.png",75,0],["159","Crimsonfish","Peixes","fish/Crimsonfish.png",1500,0],["214","Crispy Bass","Culinária","cooking/Crispy Bass.png",150,0],["418","Crocus","Forrageamento","forageables/Crocus.png",60,0],["21","Crystal Dagger","Armas","weapons/daggers/Crystal Dagger.png",200,0],["Crystal Floor","Crystal Floor","Criação (Crafting)","craftable/decor/Crystal Floor.png",-1,0],["414","Crystal Fruit","Forrageamento","forageables/Crystal Fruit.png",150,0],["Crystal Path","Crystal Path","Criação (Crafting)","craftable/decor/Crystal Path.png",-1,0],["878","Crystal Shoes","Calçados","footwear/Crystal Shoes.png",400,0],["Crystalarium","Crystalarium","Criação (Crafting)","craftable/refining-equipment/Crystalarium.png",-1,0],["856","Curiosity Lure","Iscas & Anzóis","fish/tackle/Curiosity Lure.png",500,0],["44","Cutlass","Armas","weapons/swords/Cutlass.png",150,0],["18","Daffodil","Forrageamento","forageables/Daffodil.png",30,0],["29","Daisy","Chapéus","hats/Daisy.png",1000,0],["22","Dandelion","Forrageamento","forageables/Dandelion.png",40,0],["DarkBallcap","Dark Ballcap","Chapéus","hats/Dark Ballcap.png",-1,0],["511","Dark Boots","Calçados","footwear/Dark Boots.png",300,0],["83","Dark Cowboy Hat","Chapéus","hats/Dark Cowboy Hat.png",-1,0],["Dark Sign","Dark Sign","Criação (Crafting)","craftable/signs/Dark Sign.png",-1,0],["2","Dark Sword","Armas","weapons/swords/Dark Sword.png",450,0],["DarkTalisman","Dark Talisman","Itens Especiais","special-items/Dark Talisman.png",-1,0],["DarkVelvetBow","Dark Velvet Bow","Chapéus","hats/Dark Velvet Bow.png",-1,0],["Dehydrator","Dehydrator","Criação (Crafting)","craftable/artisan-equipment/Dehydrator.png",-1,0],["12","Delicate Bow","Chapéus","hats/Delicate Bow.png",1000,0],["Deluxe Bait","Deluxe Bait","Criação (Crafting)","fish/bait/Deluxe Bait.png",1,0],["81","Deluxe Cowboy Hat","Chapéus","hats/Deluxe Cowboy Hat.png",-1,0],["Deluxe Fertilizer","Deluxe Fertilizer","Criação (Crafting)","craftable/fertilizer/Deluxe Fertilizer.png",-1,0],["deluxe-pack","Deluxe Pack","Ferramentas","tools/backpack/Deluxe Pack.png",-1,0],["76","Deluxe Pirate Hat","Chapéus","hats/Deluxe Pirate Hat.png",-1,0],["Deluxe Retaining Soil","Deluxe Retaining Soil","Criação (Crafting)","craftable/fertilizer/Deluxe Retaining Soil.png",-1,0],["Deluxe Scarecrow","Deluxe Scarecrow","Criação (Crafting)","scarecrows/Deluxe Scarecrow.png",-1,0],["Deluxe Speed-Gro","Deluxe Speed-Gro","Criação (Crafting)","craftable/fertilizer/Deluxe Speed-Gro.png",-1,0],["Deluxe Worm Bin","Deluxe Worm Bin","Criação (Crafting)","craftable/refining-equipment/Deluxe Worm Bin.png",-1,0],["72","Diamond","Minerais & Gemas","minerals/gems/Diamond.png",750,0],["diamond-node","Diamond Node","Minerais & Gemas","minerals/nodes/Diamond Node.png",-1,0],["dinosaur","Dinosaur","Outros Itens","animals/Dinosaur.png",-1,0],["107","Dinosaur Egg","Artefatos","animals/produce/Dinosaur Egg.png",350,0],["43","Dinosaur Hat","Chapéus","hats/Dinosaur Hat.png",-1,0],["807","Dinosaur Mayonnaise","Produtos Artesanais","artisan-goods/Dinosaur Mayonnaise.png",800,0],["242","Dish O' The Sea","Culinária","cooking/Dish O' The Sea.png",220,0],["dog-1","Dog","Outros Itens","animals/Dog 1.png",-1,0],["543","Dolomite","Minerais & Gemas","minerals/geode-minerals/Dolomite.png",300,0],["704","Dorado","Peixes","fish/Dorado.png",100,0],["852","Dragon Tooth","Espólios de Monstros","monsters/monster-loot/Dragon Tooth.png",500,0],["855","Dragonscale Boots","Calçados","footwear/Dragonscale Boots.png",350,0],["58","Dragontooth Club","Armas","weapons/clubs/Dragontooth Club.png",700,0],["57","Dragontooth Cutlass","Armas","weapons/swords/Dragontooth Cutlass.png",650,0],["59","Dragontooth Shiv","Armas","weapons/daggers/Dragontooth Shiv.png",600,0],["Dressed Spinner","Dressed Spinner","Criação (Crafting)","fish/tackle/Dressed Spinner.png",500,0],["DriedFruit","Dried Fruit","Produtos Artesanais","artisan-goods/Dried Fruit.png",-1,0],["DriedMushrooms","Dried Mushrooms","Produtos Artesanais","artisan-goods/Dried Mushrooms.png",-1,0],["116","Dried Starfish","Artefatos","artifacts/Dried Starfish.png",40,0],["Drum Block","Drum Block","Criação (Crafting)","craftable/furniture/Drum Block.png",-1,0],["duck","Duck","Outros Itens","animals/Duck.png",-1,0],["442","Duck Egg","Produtos Animais","animals/produce/Duck Egg.png",95,0],["444","Duck Feather","Produtos Animais","animals/produce/Duck Feather.png",250,0],["307","Duck Mayonnaise","Produtos Artesanais","artisan-goods/Duck Mayonnaise.png",375,0],["Duggy","Duggy","Outros Itens","monsters/Duggy.png",-1,0],["Dust Spirit","Dust Sprite","Outros Itens","monsters/Dust Sprite.png",-1,0],["56","Dwarf Dagger","Armas","weapons/daggers/Dwarf Dagger.png",550,0],["122","Dwarf Gadget","Artefatos","artifacts/Dwarf Gadget.png",200,0],["55","Dwarf Hammer","Armas","weapons/clubs/Dwarf Hammer.png",650,0],["96","Dwarf Scroll I","Artefatos","artifacts/Dwarf Scroll I.png",1,0],["97","Dwarf Scroll II","Artefatos","artifacts/Dwarf Scroll II.png",1,0],["98","Dwarf Scroll III","Artefatos","artifacts/Dwarf Scroll III.png",1,0],["99","Dwarf Scroll IV","Artefatos","artifacts/Dwarf Scroll IV.png",1,0],["54","Dwarf Sword","Armas","weapons/swords/Dwarf Sword.png",650,0],["121","Dwarvish Helm","Artefatos","artifacts/Dwarvish Helm.png",100,0],["Bombs","Dwarvish Safety Manual","Itens Especiais","special-items/Dwarvish Safety Manual.png",-1,0],["Dwarvish Sentry","Dwarvish Sentry","Outros Itens","monsters/Dwarvish Sentry.png",-1,0],["DwarvishTranslationGuide","Dwarvish Translation Guide","Itens Especiais","special-items/Dwarvish Translation Guide.png",-1,0],["11","Earmuffs","Chapéus","hats/Earmuffs.png",4000,0],["86","Earth Crystal","Minerais & Gemas","minerals/foraged-minerals/Earth Crystal.png",50,0],["148","Eel","Peixes","fish/Eel.png",85,0],["176","Egg","Produtos Animais","animals/produce/Egg.png",50,0],["272","Eggplant","Culturas & Fazenda","crops/eggplant/crop.png",60,0],["231","Eggplant Parmesan","Culinária","cooking/Eggplant Parmesan.png",200,0],["488","Eggplant Seeds","Sementes & Mudas","crops/eggplant/seed.png",10,0],["64","Elegant Turban","Chapéus","hats/Elegant Turban.png",50000,0],["20","Elf Blade","Armas","weapons/daggers/Elf Blade.png",100,0],["35","Elliott's Pencil","Armas","weapons/daggers/Elliott's Pencil.png",200,0],["104","Elvish Jewelry","Artefatos","artifacts/Elvish Jewelry.png",200,0],["60","Emerald","Minerais & Gemas","minerals/gems/Emerald.png",250,0],["emerald-node","Emerald Node","Minerais & Gemas","minerals/nodes/Emerald Node.png",-1,0],["533","Emerald Ring","Anéis","rings/Emerald Ring.png",300,0],["804","Emily's Magic Boots","Calçados","footwear/Emily's Magic Boots.png",400,0],["41","Emily's Magic Hat","Chapéus","hats/Emily's Magic Hat.png",-1,0],["729","Escargot","Culinária","cooking/Escargot.png",125,0],["544","Esperite","Minerais & Gemas","minerals/geode-minerals/Esperite.png",100,0],["Explosive Ammo","Explosive Ammo","Criação (Crafting)","craftable/misc/Explosive Ammo.png",-1,0],["24","Eye Patch","Chapéus","hats/Eye Patch.png",5000,0],["fairy-box","Fairy Box","Bugigangas (1.6)","trinkets/Fairy Box.png",1000,0],["Fairy Dust","Fairy Dust","Criação (Crafting)","craftable/consumables/Fairy Dust.png",-1,0],["595","Fairy Rose","Culturas & Fazenda","crops/fairy-rose/crop.png",290,0],["425","Fairy Seeds","Sementes & Mudas","crops/fairy-rose/seed.png",100,0],["577","Fairy Stone","Minerais & Gemas","minerals/geode-minerals/Fairy Stone.png",250,0],["False Magma Cap","False Magma Cap","Outros Itens","monsters/False Magma Cap.png",-1,0],["Farm Computer","Farm Computer","Criação (Crafting)","craftable/misc/Farm Computer.png",-1,0],["240","Farmer's Lunch","Culinária","cooking/Farmer's Lunch.png",150,0],["Mastery_Farming","Farming Mastery","Itens Especiais","special-items/Mastery Icon.png",-1,0],["47","Fashion Hat","Chapéus","hats/Fashion Hat.png",-1,0],["19","Fedora","Chapéus","hats/Fedora.png",-1,0],["31","Femur","Armas","weapons/clubs/Femur.png",100,0],["771","Fiber","Culturas & Fazenda","crops/fiber/crop.png",1,0],["Fiber Seeds","Fiber Seeds","Criação (Crafting)","craftable/seeds/Fiber Seeds.png",5,0],["259","Fiddlehead Fern","Forrageamento","forageables/Fiddlehead Fern.png",90,0],["649","Fiddlehead Risotto","Culinária","cooking/Fiddlehead Risotto.png",350,0],["12","Fiddlehead Stalk","Outros Itens","trees/fiddlehead/portrait.png",-1,0],["Field Snack","Field Snack","Criação (Crafting)","craftable/edible-items/Field Snack.png",-1,0],["565","Fire Opal","Minerais & Gemas","minerals/geode-minerals/Fire Opal.png",350,0],["82","Fire Quartz","Minerais & Gemas","minerals/foraged-minerals/Fire Quartz.png",100,0],["512","Firewalker Boots","Calçados","footwear/Firewalker Boots.png",300,0],["Fish Smoker","Fish Smoker","Criação (Crafting)","craftable/artisan-equipment/Fish Smoker.png",-1,0],["728","Fish Stew","Culinária","cooking/Fish Stew.png",175,0],["213","Fish Taco","Culinária","cooking/Fish Taco.png",500,0],["55","Fishing Hat","Chapéus","hats/Fishing Hat.png",-1,0],["Mastery_Fishing","Fishing Mastery","Itens Especiais","special-items/Mastery Icon.png",-1,0],["fishing-rod","Fishing Rod","Ferramentas","",-1,0],["63","Flat Topped Hat","Chapéus","hats/Flat Topped Hat.png",-1,0],["54","Floppy Beanie","Chapéus","hats/Floppy Beanie.png",-1,0],["267","Flounder","Peixes","fish/Flounder.png",100,0],["545","Fluorapatite","Minerais & Gemas","minerals/geode-minerals/Fluorapatite.png",200,0],["Flute Block","Flute Block","Criação (Crafting)","craftable/furniture/Flute Block.png",-1,0],["90","Forager's Hat","Chapéus","hats/Forager's Hat.png",-1,0],["Mastery_Foraging","Foraging Mastery","Itens Especiais","special-items/Mastery Icon.png",-1,0],["ForestMagic","Forest Magic","Itens Especiais","special-items/Forest Magic.png",-1,0],["15","Forest Sword","Armas","weapons/swords/Forest Sword.png",150,0],["202","Fried Calamari","Culinária","cooking/Fried Calamari.png",150,0],["225","Fried Eel","Culinária","cooking/Fried Eel.png",120,0],["194","Fried Egg","Culinária","cooking/Fried Egg.png",35,0],["205","Fried Mushroom","Culinária","cooking/Fried Mushroom.png",200,0],["Friendship","Friendship 101","Itens Especiais","special-items/Friendship 101.png",-1,0],["frog-egg","Frog Egg","Bugigangas (1.6)","trinkets/Frog Egg.png",1000,0],["78","Frog Hat","Chapéus","hats/Frog Hat.png",-1,0],["Frost Bat","Frost Bat","Outros Itens","monsters/Frost Bat.png",-1,0],["Frost Jelly","Frost Jelly","Outros Itens","monsters/Blue Slime.png",-1,0],["536","Frozen Geode","Minerais & Gemas","minerals/geodes/Frozen Geode.png",100,0],["frozen-geode-node","Frozen Geode Node","Minerais & Gemas","minerals/nodes/Frozen Geode Node.png",-1,0],["84","Frozen Tear","Minerais & Gemas","minerals/foraged-minerals/Frozen Tear.png",75,0],["610","Fruit Salad","Culinária","cooking/Fruit Salad.png",450,0],["Furnace","Furnace","Criação (Crafting)","craftable/refining-equipment/Furnace.png",-1,0],["23","Galaxy Dagger","Armas","weapons/daggers/Galaxy Dagger.png",400,0],["29","Galaxy Hammer","Armas","weapons/clubs/Galaxy Hammer.png",600,0],["4","Galaxy Sword","Armas","weapons/swords/Galaxy Sword.png",650,0],["66","Garbage Hat","Chapéus","hats/Garbage Hat.png",-1,0],["Garden Pot","Garden Pot","Criação (Crafting)","craftable/misc/Garden Pot.png",-1,0],["248","Garlic","Culturas & Fazenda","crops/garlic/crop.png",60,0],["476","Garlic Seeds","Sementes & Mudas","crops/garlic/seed.png",20,0],["Gate","Gate","Criação (Crafting)","craftable/fences/Gate.png",-1,0],["gem-node","Gem Node","Minerais & Gemas","minerals/nodes/Gem Node.png",-1,0],["546","Geminite","Minerais & Gemas","minerals/geode-minerals/Geminite.png",150,0],["513","Genie Shoes","Calçados","footwear/Genie Shoes.png",350,0],["535","Geode","Minerais & Gemas","minerals/geodes/Geode.png",50,0],["Geode Crusher","Geode Crusher","Criação (Crafting)","craftable/refining-equipment/Geode Crusher.png",-1,0],["geode-node","Geode Node","Minerais & Gemas","minerals/nodes/Geode Node.png",-1,0],["Ghost","Ghost","Outros Itens","monsters/Ghost.png",-1,0],["561","Ghost Crystal","Minerais & Gemas","minerals/geode-minerals/Ghost Crystal.png",200,0],["156","Ghostfish","Peixes","fish/Ghostfish.png",45,0],["GilsHat","Gil's Hat","Chapéus","hats/Gil's Hat.png",-1,0],["829","Ginger","Forrageamento","forageables/Ginger.png",60,0],["903","Ginger Ale","Culinária","cooking/Ginger Ale.png",200,0],["775","Glacierfish","Peixes","fish/Glacierfish.png",1000,0],["902","Glacierfish Jr.","Peixes","fish/Glacierfish Jr.png",1000,0],["118","Glass Shards","Artefatos","artifacts/Glass Shards.png",20,0],["208","Glazed Yams","Culinária","cooking/Glazed Yams.png",200,0],["517","Glow Ring","Anéis","rings/Glow Ring.png",100,0],["Glowstone Ring","Glowstone Ring","Criação (Crafting)","rings/Glowstone Ring.png",100,0],["23","Gnome's Cap","Chapéus","hats/Gnome's Cap.png",5000,0],["goat","Goat","Outros Itens","animals/Goat.png",-1,0],["426","Goat Cheese","Produtos Artesanais","artisan-goods/Goat Cheese.png",400,0],["436","Goat Milk","Produtos Animais","animals/produce/Goat Milk.png",225,0],["9","Goblin Mask","Chapéus","hats/Goblin Mask.png",10000,0],["Goby","Goby","Peixes","fish/Goby.png",150,0],["89","Goggles","Chapéus","hats/Goggles.png",-1,0],["336","Gold Bar","Minerais & Gemas","minerals/bars/Gold Bar.png",250,0],["Gold Brazier","Gold Brazier","Criação (Crafting)","craftable/lighting/Gold Brazier.png",-1,0],["gold-node","Gold Node","Minerais & Gemas","minerals/nodes/Gold Node.png",-1,0],["384","Gold Ore","Minerais & Gemas","minerals/ore/Gold Ore.png",25,0],["gold-pan-hat","Gold Pan (hat)","Chapéus","hats/Gold Pan (hat).png",-1,0],["golden-chicken","Golden Chicken","Outros Itens","animals/Golden Chicken.png",-1,0],["791","Golden Coconut","Minerais & Gemas","minerals/geodes/Golden Coconut.png",0,0],["928","Golden Egg","Produtos Animais","animals/produce/Golden Egg.png",500,0],["75","Golden Helmet","Chapéus","hats/Golden Helmet.png",-1,0],["124","Golden Mask","Artefatos","artifacts/Golden Mask.png",500,0],["GoldenMysteryBox","Golden Mystery Box","Minerais & Gemas","minerals/geodes/Golden Mystery Box.png",0,0],["125","Golden Relic","Artefatos","artifacts/Golden Relic.png",250,0],["golden-scythe","Golden Scythe","Ferramentas","tools/Golden Scythe.png",-1,0],["golden-spur","Golden Spur","Bugigangas (1.6)","trinkets/Golden Spur.png",1000,0],["18","Good Ol' Cap","Chapéus","hats/Good Ol' Cap.png",1000,0],["GovernorsHat","Governor's Hat","Chapéus","hats/Governor's Hat.png",5000,0],["569","Granite","Minerais & Gemas","minerals/geode-minerals/Granite.png",75,0],["398","Grape","Culturas & Fazenda","crops/grape/crop.png",80,0],["301","Grape Starter","Sementes & Mudas","crops/grape/seed.png",30,0],["Grass Starter","Grass Starter","Criação (Crafting)","craftable/seeds/Grass Starter.png",-1,0],["Gravel Path","Gravel Path","Criação (Crafting)","craftable/decor/Gravel Path.png",-1,0],["153","Green Algae","Peixes","fish/Green Algae.png",15,0],["188","Green Bean","Culturas & Fazenda","crops/green-bean/crop.png",40,0],["Green Slime","Green Slime","Outros Itens","monsters/Green Slime.png",-1,0],["614","Green Tea","Produtos Artesanais","artisan-goods/Green Tea.png",100,0],["72","Green Turban","Chapéus","hats/Green Turban.png",-1,0],["Grub","Grub","Outros Itens","monsters/Grub.png",-1,0],["49","Hair Bone","Chapéus","hats/Hair Bone.png",-1,0],["42","Haley's Iron","Armas","weapons/swords/Haley's Iron.png",300,0],["708","Halibut","Peixes","fish/Halibut.png",80,0],["27","Hard Hat","Chapéus","hats/Hard Hat.png",-1,0],["709","Hardwood","Forrageamento","forageables/Hardwood.png",15,0],["Hardwood Fence","Hardwood Fence","Criação (Crafting)","craftable/fences/Hardwood Fence.png",-1,0],["37","Harvey's Mallet","Armas","weapons/clubs/Harvey's Mallet.png",350,0],["210","Hashbrowns","Culinária","cooking/Hashbrowns.png",120,0],["Haunted Skull","Haunted Skull","Outros Itens","monsters/Haunted Skull.png",-1,0],["408","Hazelnut","Forrageamento","forageables/Hazelnut.png",90,0],["heater","Heater","Ferramentas","tools/Heater.png",-1,0],["Heavy Furnace","Heavy Furnace","Criação (Crafting)","craftable/refining-equipment/Heavy Furnace.png",-1,0],["Heavy Tapper","Heavy Tapper","Criação (Crafting)","craftable/refining-equipment/Heavy Tapper.png",-1,0],["547","Helvite","Minerais & Gemas","minerals/geode-minerals/Helvite.png",450,0],["573","Hematite","Minerais & Gemas","minerals/geode-minerals/Hematite.png",150,0],["147","Herring","Peixes","fish/Herring.png",30,0],["hoe","Hoe","Ferramentas","",-1,0],["283","Holly","Forrageamento","forageables/Holly.png",80,0],["3","Holy Blade","Armas","weapons/swords/Holy Blade.png",350,0],["340","Honey","Produtos Artesanais","artisan-goods/Honey.png",-1,0],["Hopper","Hopper","Criação (Crafting)","craftable/misc/Hopper.png",-1,0],["304","Hops","Culturas & Fazenda","crops/hops/crop.png",25,0],["302","Hops Starter","Sementes & Mudas","crops/hops/seed.png",30,0],["horse","Horse","Outros Itens","animals/horse.png",-1,0],["Horse","Horse: The Book","Itens Especiais","special-items/Horse The Book.png",-1,0],["Hot Head","Hot Head","Outros Itens","monsters/Hot Head.png",-1,0],["860","Hot Java Ring","Anéis","rings/Hot Java Ring.png",100,0],["260","Hot Pepper","Culturas & Fazenda","crops/hot-pepper/crop.png",40,0],["15","Hunter's Cap","Chapéus","hats/Hunter's Cap.png",5000,0],["Hyper Speed-Gro","Hyper Speed-Gro","Criação (Crafting)","craftable/fertilizer/Hyper Speed-Gro.png",-1,0],["233","Ice Cream","Culinária","cooking/Ice Cream.png",120,0],["161","Ice Pip","Peixes","fish/Ice Pip.png",500,0],["ice-rod","Ice Rod","Bugigangas (1.6)","trinkets/Ice Rod.png",1000,0],["887","Immunity Band","Anéis","rings/Immunity Band.png",250,0],["62","Infinity Blade","Armas","weapons/swords/Infinity Blade.png",850,0],["InfinityCrown","Infinity Crown","Chapéus","hats/Infinity Crown.png",20000,0],["64","Infinity Dagger","Armas","weapons/daggers/Infinity Dagger.png",800,0],["63","Infinity Gavel","Armas","weapons/clubs/Infinity Gavel.png",850,0],["13","Insect Head","Armas","weapons/swords/Insect Head.png",200,0],["Iridium Band","Iridium Band","Criação (Crafting)","rings/Iridium Band.png",1000,0],["337","Iridium Bar","Minerais & Gemas","minerals/bars/Iridium Bar.png",1000,0],["Iridium Bat","Iridium Bat","Outros Itens","monsters/Iridium Bat.png",-1,0],["Iridium Crab","Iridium Crab","Outros Itens","monsters/Iridium Crab.png",-1,0],["Iridium Golem","Iridium Golem","Outros Itens","monsters/Iridium Golem.png",-1,0],["61","Iridium Needle","Armas","weapons/daggers/Iridium Needle.png",600,0],["iridium-node","Iridium Node","Minerais & Gemas","minerals/nodes/Iridium Node.png",-1,0],["386","Iridium Ore","Minerais & Gemas","minerals/ore/Iridium Ore.png",100,0],["iridium-pan-hat","Iridium Pan (hat)","Chapéus","hats/Iridium Pan (hat).png",-1,0],["iridium-scythe","Iridium Scythe","Ferramentas","tools/Iridium Scythe.png",-1,0],["Iridium Sprinkler","Iridium Sprinkler","Criação (Crafting)","craftable/sprinklers/Iridium Sprinkler.png",-1,0],["iridium-turtle","Iridium Turtle","Outros Itens","animals/Iridium Turtle.png",-1,0],["335","Iron Bar","Minerais & Gemas","minerals/bars/Iron Bar.png",120,0],["17","Iron Dirk","Armas","weapons/daggers/Iron Dirk.png",50,0],["6","Iron Edge","Armas","weapons/swords/Iron Edge.png",150,0],["Iron Fence","Iron Fence","Criação (Crafting)","craftable/fences/Iron Fence.png",-1,0],["Iron Lamp-post","Iron Lamp-post","Criação (Crafting)","craftable/lighting/Iron Lamp-post.png",-1,0],["iron-node","Iron Node","Minerais & Gemas","minerals/nodes/Iron Node.png",-1,0],["380","Iron Ore","Minerais & Gemas","minerals/ore/Iron Ore.png",10,0],["Defense","Jack Be Nimble, Jack Be Thick","Itens Especiais","special-items/Jack Be Nimble, Jack Be Thick.png",-1,0],["Jack-O-Lantern","Jack-O-Lantern","Criação (Crafting)","craftable/lighting/Jack-O-Lantern.png",-1,0],["70","Jade","Minerais & Gemas","minerals/gems/Jade.png",200,0],["jade-node","Jade Node","Minerais & Gemas","minerals/nodes/Jade Node.png",-1,0],["532","Jade Ring","Anéis","rings/Jade Ring.png",200,0],["549","Jagoite","Minerais & Gemas","minerals/geode-minerals/Jagoite.png",115,0],["548","Jamborite","Minerais & Gemas","minerals/geode-minerals/Jamborite.png",150,0],["563","Jasper","Minerais & Gemas","minerals/geode-minerals/Jasper.png",150,0],["429","Jazz Seeds","Sementes & Mudas","crops/blue-jazz/seed.png",15,0],["344","Jelly","Produtos Artesanais","artisan-goods/Jelly.png",-1,0],["JesterHat","Jester Hat","Chapéus","hats/Jester Hat.png",25000,0],["Roe","Jewels Of The Sea","Itens Especiais","special-items/Jewels Of The Sea.png",-1,0],["JojaCap","Joja Cap","Chapéus","hats/Joja Cap.png",-1,0],["350","Juice","Produtos Artesanais","artisan-goods/Juice.png",-1,0],["528","Jukebox Ring","Anéis","rings/Jukebox Ring.png",100,0],["JunimoHat","Junimo Hat","Chapéus","hats/Junimo Hat.png",25000,0],["250","Kale","Culturas & Fazenda","crops/kale/crop.png",110,0],["477","Kale Seeds","Sementes & Mudas","crops/kale/seed.png",35,0],["Keg","Keg","Criação (Crafting)","craftable/artisan-equipment/Keg.png",-1,0],["KeyToTheTown","Key To The Town","Itens Especiais","special-items/Key To The Town.png",-1,0],["50","Knight's Helmet","Chapéus","hats/Knight's Helmet.png",-1,0],["46","Kudgel","Armas","weapons/clubs/Kudgel.png",250,0],["550","Kyanite","Minerais & Gemas","minerals/geode-minerals/Kyanite.png",250,0],["182","Large Brown Egg","Produtos Animais","animals/produce/Large Brown Egg.png",95,0],["174","Large Egg","Produtos Animais","animals/produce/Large Egg.png",95,0],["438","Large Goat Milk","Produtos Animais","animals/produce/Large Goat Milk.png",345,0],["186","Large Milk","Produtos Animais","animals/produce/Large Milk.png",190,0],["large-pack","Large Pack","Ferramentas","tools/backpack/Large Pack.png",-1,0],["136","Largemouth Bass","Peixes","fish/Largemouth Bass.png",100,0],["LaurelWreathCrown","Laurel Wreath Crown","Chapéus","hats/Laurel Wreath Crown.png",-1,0],["Lava Bat","Lava Bat","Outros Itens","monsters/Lava Bat.png",-1,0],["Lava Crab","Lava Crab","Outros Itens","monsters/Lava Crab.png",-1,0],["162","Lava Eel","Peixes","fish/Lava Eel.png",700,0],["9","Lava Katana","Armas","weapons/swords/Lava Katana.png",500,0],["Lava Lurk","Lava Lurk","Outros Itens","monsters/Lava Lurk.png",-1,0],["692","Lead Bobber","Iscas & Anzóis","fish/tackle/Lead Bobber.png",150,0],["26","Lead Rod","Armas","weapons/clubs/Lead Rod.png",200,0],["39","Leah's Whittler","Armas","weapons/swords/Leah's Whittler.png",300,0],["506","Leather Boots","Calçados","footwear/Leather Boots.png",100,0],["20","Leek","Forrageamento","forageables/Leek.png",60,0],["163","Legend","Peixes","fish/Legend.png",5000,0],["900","Legend II","Peixes","fish/Legend II.png",5000,0],["554","Lemon Stone","Minerais & Gemas","minerals/geode-minerals/Lemon Stone.png",200,0],["LeprechuanHat","Leprechaun Hat","Chapéus","hats/Leprechaun Hat.png",-1,0],["806","Leprechaun Shoes","Calçados","footwear/Leprechaun Shoes.png",150,0],["Life Elixir","Life Elixir","Criação (Crafting)","craftable/edible-items/Life Elixir.png",-1,0],["Lightning Rod","Lightning Rod","Criação (Crafting)","craftable/refining-equipment/Lightning Rod.png",-1,0],["571","Limestone","Minerais & Gemas","minerals/geode-minerals/Limestone.png",15,0],["707","Lingcod","Peixes","fish/Lingcod.png",120,0],["837","Lionfish","Peixes","fish/Lionfish.png",100,0],["40","Living Hat","Chapéus","hats/Living Hat.png",-1,0],["715","Lobster","Peixes","fish/Lobster.png",120,0],["730","Lobster Bisque","Culinária","cooking/Lobster Bisque.png",205,0],["45","Logo Cap","Chapéus","hats/Logo Cap.png",-1,0],["Loom","Loom","Criação (Crafting)","craftable/artisan-equipment/Loom.png",-1,0],["21","Lucky Bow","Chapéus","hats/Lucky Bow.png",2000,0],["204","Lucky Lunch","Culinária","cooking/Lucky Lunch.png",250,0],["859","Lucky Ring","Anéis","rings/Lucky Ring.png",100,0],["551","Lunarite","Minerais & Gemas","minerals/geode-minerals/Lunarite.png",200,0],["Magic Bait","Magic Bait","Criação (Crafting)","fish/bait/Magic Bait.png",1,0],["73","Magic Cowboy Hat","Chapéus","hats/Magic Cowboy Hat.png",-1,0],["magic-hair-gel","Magic Hair Gel","Bugigangas (1.6)","trinkets/Magic Hair Gel.png",1000,0],["MagicInk","Magic Ink","Itens Especiais","special-items/Magic Ink.png",-1,0],["magic-quiver","Magic Quiver","Bugigangas (1.6)","trinkets/Magic Quiver.png",1000,0],["74","Magic Turban","Chapéus","hats/Magic Turban.png",-1,0],["851","Magma Cap","Forrageamento","forageables/Magma Cap.png",400,0],["Magma Duggy","Magma Duggy","Outros Itens","monsters/Magma Duggy.png",-1,0],["537","Magma Geode","Minerais & Gemas","minerals/geodes/Magma Geode.png",150,0],["magma-geode-node","Magma Geode Node","Minerais & Gemas","minerals/nodes/Magma Geode Node.png",-1,0],["Magma Sparker","Magma Sparker","Outros Itens","monsters/Magma Sparker.png",-1,0],["Magma Sprite","Magma Sprite","Outros Itens","monsters/Magma Sprite.png",-1,0],["Magnet","Magnet","Criação (Crafting)","fish/bait/Magnet.png",15,0],["519","Magnet Ring","Anéis","rings/Magnet Ring.png",100,0],["MagnifyingGlass","Magnifying Glass","Itens Especiais","special-items/Magnifying Glass.png",-1,0],["292","Mahogany Seed","Sementes & Mudas","trees/mahogany/seed.png",-1,0],["8","Mahogany Tree","Outros Itens","trees/mahogany/portrait.png",-1,0],["228","Maki Roll","Culinária","cooking/Maki Roll.png",220,0],["552","Malachite","Minerais & Gemas","minerals/geode-minerals/Malachite.png",100,0],["834","Mango","Culturas & Fazenda","trees/mango/crop.png",130,0],["905","Mango Sticky Rice","Culinária","cooking/Mango Sticky Rice.png",250,0],["835","Mango Tree","Outros Itens","trees/mango/harvest.png",-1,0],["731","Maple Bar","Culinária","cooking/Maple Bar.png",300,0],["310","Maple Seed","Sementes & Mudas","trees/maple/seed.png",-1,0],["724","Maple Syrup","Produtos Artesanais","forageables/Maple Syrup.png",200,0],["2","Maple Tree","Outros Itens","trees/maple/portrait.png",-1,0],["Marlon","Mapping Cave Systems","Itens Especiais","special-items/Mapping Cave Systems.png",-1,0],["567","Marble","Minerais & Gemas","minerals/geode-minerals/Marble.png",110,0],["Marble Brazier","Marble Brazier","Criação (Crafting)","craftable/lighting/Marble Brazier.png",-1,0],["36","Maru's Wrench","Armas","weapons/clubs/Maru's Wrench.png",350,0],["33","Master Slingshot","Armas","weapons/slingshots/Master Slingshot.png",50,0],["306","Mayonnaise","Produtos Artesanais","artisan-goods/Mayonnaise.png",190,0],["Mayonnaise Machine","Mayonnaise Machine","Criação (Crafting)","craftable/artisan-equipment/Mayonnaise Machine.png",-1,0],["459","Mead","Produtos Artesanais","artisan-goods/Mead.png",300,0],["Mega Bomb","Mega Bomb","Criação (Crafting)","craftable/bombs/Mega Bomb.png",-1,0],["254","Melon","Culturas & Fazenda","crops/melon/crop.png",250,0],["479","Melon Seeds","Sementes & Mudas","crops/melon/seed.png",40,0],["65","Meowmere","Armas","weapons/swords/Meowmere.png",200,0],["854","Mermaid Boots","Calçados","footwear/Mermaid Boots.png",650,0],["Metal Head","Metal Head","Outros Itens","monsters/Metal Head.png",-1,0],["269","Midnight Carp","Peixes","fish/Midnight Carp.png",150,0],["798","Midnight Squid","Peixes","fish/Midnight Squid.png",100,0],["184","Milk","Produtos Animais","animals/produce/Milk.png",125,0],["milk-pail","Milk Pail","Ferramentas","tools/Milk Pail.png",-1,0],["243","Miner's Treat","Culinária","cooking/Miner's Treat.png",200,0],["Mini-Forge","Mini-Forge","Criação (Crafting)","craftable/misc/Mini-Forge.png",-1,0],["Mini-Jukebox","Mini-Jukebox","Criação (Crafting)","craftable/misc/Mini-Jukebox.png",-1,0],["Mini-Obelisk","Mini-Obelisk","Criação (Crafting)","craftable/misc/Mini-Obelisk.png",-1,0],["Mastery_Mining","Mining Mastery","Itens Especiais","special-items/Mastery Icon.png",-1,0],["MiningMonthly","Mining Monthly","Itens Especiais","special-items/Mining Monthly.png",-1,0],["Void","Monster Compendium","Itens Especiais","special-items/Monster Compendium.png",-1,0],["Monster Musk","Monster Musk","Criação (Crafting)","craftable/consumables/Monster Musk.png",-1,0],["257","Morel","Forrageamento","forageables/Morel.png",150,0],["Moss","Moss","Forrageamento","forageables/Moss.png",5,0],["MossSoup","Moss Soup","Culinária","cooking/Moss Soup.png",80,0],["MossySeed","Mossy Seed","Sementes & Mudas","trees/fiddlehead/seed.png",-1,0],["31","Mouse Ears","Chapéus","hats/Mouse Ears.png",2000,0],["82","Mr. Qi's Hat","Chapéus","hats/Mr. Qi's Hat.png",-1,0],["899","Ms. Angler","Peixes","fish/Ms. Angler.png",900,0],["574","Mudstone","Minerais & Gemas","minerals/geode-minerals/Mudstone.png",25,0],["Mummy","Mummy","Outros Itens","monsters/Mummy.png",-1,0],["MummyMask","Mummy Mask","Chapéus","hats/Mummy Mask.png",-1,0],["42","Mushroom Cap","Chapéus","hats/Mushroom Cap.png",-1,0],["Mushroom Log","Mushroom Log","Criação (Crafting)","craftable/refining-equipment/Mushroom Log.png",-1,0],["7","Mushroom Tree","Outros Itens","trees/mushroom/portrait.png",-1,0],["891","Mushroom Tree Seed","Sementes & Mudas","trees/mushroom/seed.png",-1,0],["719","Mussel","Peixes","fish/Mussel.png",30,0],["mussel-node","Mussel Node","Minerais & Gemas","minerals/nodes/Mussel Node.png",-1,0],["682","Mutant Carp","Peixes","fish/Mutant Carp.png",1000,0],["MysteryBox","Mystery Box","Minerais & Gemas","minerals/geodes/Mystery Box.png",0,0],["MysteryHat","Mystery Hat","Chapéus","hats/Mystery Hat.png",-1,0],["mystic-stone","Mystic Stone","Minerais & Gemas","minerals/nodes/Mystic Stone.png",-1,0],["MysticSyrup","Mystic Syrup","Produtos Artesanais","artisan-goods/Mystic Syrup.png",1000,0],["13","Mystic Tree","Outros Itens","trees/mystic/portrait.png",-1,0],["Mystic Tree Seed","Mystic Tree Seed","Criação (Crafting)","craftable/seeds/Mystic Tree Seed.png",-1,0],["811","Napalm Ring","Anéis","rings/Napalm Ring.png",1000,0],["586","Nautilus Fossil","Artefatos","artifacts/Nautilus Fossil.png",80,0],["392","Nautilus Shell","Forrageamento","forageables/Nautilus Shell.png",120,0],["555","Nekoite","Minerais & Gemas","minerals/geode-minerals/Nekoite.png",80,0],["14","Neptune's Glaive","Armas","weapons/swords/Neptune's Glaive.png",250,0],["553","Neptunite","Minerais & Gemas","minerals/geode-minerals/Neptunite.png",400,0],["725","Oak Resin","Produtos Artesanais","forageables/Oak Resin.png",150,0],["1","Oak Tree","Outros Itens","trees/oak/portrait.png",-1,0],["575","Obsidian","Minerais & Gemas","minerals/geode-minerals/Obsidian.png",200,0],["8","Obsidian Edge","Armas","weapons/swords/Obsidian Edge.png",300,0],["560","Ocean Stone","Minerais & Gemas","minerals/geode-minerals/Ocean Stone.png",220,0],["149","Octopus","Peixes","fish/Octopus.png",150,0],["5","Official Cap","Chapéus","hats/Official Cap.png",2000,0],["247","Oil","Produtos Artesanais","artisan-goods/Oil.png",100,0],["Oil Maker","Oil Maker","Criação (Crafting)","craftable/artisan-equipment/Oil Maker.png",-1,0],["Oil Of Garlic","Oil Of Garlic","Criação (Crafting)","craftable/edible-items/Oil of Garlic.png",-1,0],["Grass","Ol' Slitherlegs","Itens Especiais","special-items/Ol' Slitherlegs.png",-1,0],["195","Omelet","Culinária","cooking/Omelet.png",125,0],["749","Omni Geode","Minerais & Gemas","minerals/geodes/Omni Geode.png",0,0],["omni-geode-node","Omni Geode Node","Minerais & Gemas","minerals/nodes/Omni Geode Node.png",-1,0],["564","Opal","Minerais & Gemas","minerals/geode-minerals/Opal.png",150,0],["635","Orange","Culturas & Fazenda","trees/orange/crop.png",100,0],["630","Orange Tree","Outros Itens","trees/orange/harvest.png",-1,0],["106","Ornamental Fan","Artefatos","artifacts/Ornamental Fan.png",300,0],["556","Orpiment","Minerais & Gemas","minerals/geode-minerals/Orpiment.png",80,0],["60","Ossified Blade","Armas","weapons/swords/Ossified Blade.png",300,0],["ostrich","Ostrich","Outros Itens","animals/Ostrich.png",-1,0],["289","Ostrich Egg","Produtos Animais","animals/produce/Ostrich Egg.png",600,0],["Ostrich Incubator","Ostrich Incubator","Criação (Crafting)","craftable/refining-equipment/Ostrich Incubator.png",-1,0],["723","Oyster","Peixes","fish/Oyster.png",40,0],["PageboyCap","Pageboy Cap","Chapéus","hats/Pageboy Cap.png",5000,0],["303","Pale Ale","Produtos Artesanais","artisan-goods/Pale Ale.png",300,0],["457","Pale Broth","Culinária","cooking/Pale Broth.png",150,0],["588","Palm Fossil","Artefatos","artifacts/Palm Fossil.png",100,0],["6","Palm Tree","Outros Itens","trees/palm/portrait.png",-1,0],["pan","Pan","Ferramentas","",-1,0],["211","Pancakes","Culinária","cooking/Pancakes.png",80,0],["36","Panda Hat","Chapéus","hats/Panda Hat.png",-1,0],["PaperHat","Paper Hat","Chapéus","hats/Paper Hat.png",10000,0],["parrot-egg","Parrot Egg","Bugigangas (1.6)","trinkets/Parrot Egg.png",1000,0],["24","Parsnip","Culturas & Fazenda","crops/parsnip/crop.png",35,0],["472","Parsnip Seeds","Sementes & Mudas","crops/parsnip/seed.png",10,0],["199","Parsnip Soup","Culinária","cooking/Parsnip Soup.png",120,0],["party-hat-blue","Party Hat (blue)","Chapéus","hats/Party Hat (blue).png",-1,0],["party-hat-green","Party Hat (green)","Chapéus","hats/Party Hat (green).png",-1,0],["party-hat-red","Party Hat (red)","Chapéus","hats/Party Hat (red).png",-1,0],["636","Peach","Culturas & Fazenda","trees/peach/crop.png",140,0],["631","Peach Tree","Outros Itens","trees/peach/harvest.png",-1,0],["38","Penny's Fryer","Armas","weapons/clubs/Penny's Fryer.png",350,0],["215","Pepper Poppers","Culinária","cooking/Pepper Poppers.png",200,0],["Pepper Rex","Pepper Rex","Outros Itens","monsters/Pepper Rex.png",-1,0],["482","Pepper Seeds","Sementes & Mudas","crops/hot-pepper/seed.png",20,0],["141","Perch","Peixes","fish/Perch.png",55,0],["722","Periwinkle","Peixes","fish/Periwinkle.png",20,0],["557","Petrified Slime","Minerais & Gemas","minerals/geode-minerals/Petrified Slime.png",120,0],["863","Phoenix Ring","Anéis","rings/Phoenix Ring.png",100,0],["pickaxe","Pickaxe","Ferramentas","",-1,0],["342","Pickles","Produtos Artesanais","artisan-goods/Pickles.png",-1,0],["pig","Pig","Outros Itens","animals/Pig.png",-1,0],["144","Pike","Peixes","fish/Pike.png",100,0],["311","Pine Cone","Sementes & Mudas","trees/pine/seed.png",-1,0],["726","Pine Tar","Produtos Artesanais","forageables/Pine Tar.png",100,0],["3","Pine Tree","Outros Itens","trees/pine/portrait.png",-1,0],["832","Pineapple","Culturas & Fazenda","crops/pineapple/crop.png",300,0],["833","Pineapple Seeds","Sementes & Mudas","crops/pineapple/seed.png",240,0],["77","Pink Bow","Chapéus","hats/Pink Bow.png",-1,0],["221","Pink Cake","Culinária","cooking/Pink Cake.png",480,0],["62","Pirate Hat","Chapéus","hats/Pirate Hat.png",-1,0],["43","Pirate's Sword","Armas","weapons/swords/Pirate's Sword.png",100,0],["206","Pizza","Culinária","cooking/Pizza.png",300,0],["7","Plum Chapeau","Chapéus","hats/Plum Chapeau.png",2000,0],["604","Plum Pudding","Culinária","cooking/Plum Pudding.png",260,0],["906","Poi","Culinária","cooking/Poi.png",400,0],["22","Polka Bow","Chapéus","hats/Polka Bow.png",1000,0],["637","Pomegranate","Culturas & Fazenda","trees/pomegranate/crop.png",140,0],["632","Pomegranate Tree","Outros Itens","trees/pomegranate/harvest.png",-1,0],["376","Poppy","Culturas & Fazenda","crops/poppy/crop.png",140,0],["453","Poppy Seeds","Sementes & Mudas","crops/poppy/seed.png",50,0],["651","Poppyseed Muffin","Culinária","cooking/Poppyseed Muffin.png",250,0],["192","Potato","Culturas & Fazenda","crops/potato/crop.png",80,0],["475","Potato Seeds","Sementes & Mudas","crops/potato/seed.png",25,0],["Powdermelon","Powdermelon","Culturas & Fazenda","crops/powdermelon/crop.png",60,0],["PowdermelonSeeds","Powdermelon Seeds","Sementes & Mudas","crops/powdermelon/seed.png",20,0],["120","Prehistoric Handaxe","Artefatos","artifacts/Prehistoric Handaxe.png",50,0],["583","Prehistoric Rib","Artefatos","artifacts/Prehistoric Rib.png",100,0],["579","Prehistoric Scapula","Artefatos","artifacts/Prehistoric Scapula.png",100,0],["581","Prehistoric Skull","Artefatos","artifacts/Prehistoric Skull.png",100,0],["580","Prehistoric Tibia","Artefatos","artifacts/Prehistoric Tibia.png",100,0],["115","Prehistoric Tool","Artefatos","artifacts/Prehistoric Tool.png",50,0],["584","Prehistoric Vertebra","Artefatos","artifacts/Prehistoric Vertebra.png",100,0],["Preserves Jar","Preserves Jar","Criação (Crafting)","craftable/artisan-equipment/Preserves Jar.png",-1,0],["PriceCatalogue","Price Catalogue","Itens Especiais","special-items/Price Catalogue.png",-1,0],["74","Prismatic Shard","Minerais & Gemas","minerals/gems/Prismatic Shard.png",2000,0],["Prismatic Slime","Prismatic Slime","Outros Itens","monsters/Prismatic Slime.gif",-1,0],["68","Propeller Hat","Chapéus","hats/Propeller Hat.png",-1,0],["861","Protection Ring","Anéis","rings/Protection Ring.png",100,0],["128","Pufferfish","Peixes","fish/Pufferfish.png",200,0],["276","Pumpkin","Culturas & Fazenda","crops/pumpkin/crop.png",320,0],["48","Pumpkin Mask","Chapéus","hats/Pumpkin Mask.png",-1,0],["608","Pumpkin Pie","Culinária","cooking/Pumpkin Pie.png",385,0],["490","Pumpkin Seeds","Sementes & Mudas","crops/pumpkin/seed.png",50,0],["236","Pumpkin Soup","Culinária","cooking/Pumpkin Soup.png",300,0],["422","Purple Mushroom","Forrageamento","forageables/Purple Mushroom.png",250,0],["Putrid Ghost","Putrid Ghost","Outros Itens","monsters/Putrid Ghost.png",-1,0],["559","Pyrite","Minerais & Gemas","minerals/geode-minerals/Pyrite.png",120,0],["890","Qi Bean","Sementes & Mudas","crops/qi-fruit/seed.png",1,0],["889","Qi Fruit","Culturas & Fazenda","crops/qi-fruit/crop.png",1,0],["86","Qi Mask","Chapéus","hats/Qi Mask.png",-1,0],["Quality Bobber","Quality Bobber","Criação (Crafting)","fish/tackle/Quality Bobber.png",300,0],["Quality Fertilizer","Quality Fertilizer","Criação (Crafting)","craftable/fertilizer/Quality Fertilizer.png",-1,0],["Quality Retaining Soil","Quality Retaining Soil","Criação (Crafting)","craftable/fertilizer/Quality Retaining Soil.png",-1,0],["Quality Sprinkler","Quality Sprinkler","Criação (Crafting)","craftable/sprinklers/Quality Sprinkler.png",-1,0],["80","Quartz","Minerais & Gemas","minerals/foraged-minerals/Quartz.png",25,0],["rabbit","Rabbit","Outros Itens","animals/Rabbit.png",-1,0],["446","Rabbit's Foot","Produtos Animais","animals/produce/Rabbit's Foot.png",565,0],["RaccoonHat","Raccoon Hat","Chapéus","hats/Raccoon Hat.png",-1,0],["910","Radioactive Bar","Minerais & Gemas","minerals/bars/Radioactive Bar.png",3000,0],["901","Radioactive Carp","Peixes","fish/Radioactive Carp.png",1000,0],["84","Radioactive Goggles","Chapéus","hats/Radioactive Goggles.png",-1,0],["radioactive-node","Radioactive Node","Minerais & Gemas","minerals/nodes/Radioactive Node.png",-1,0],["909","Radioactive Ore","Minerais & Gemas","minerals/ore/Radioactive Ore.png",300,0],["264","Radish","Culturas & Fazenda","crops/radish/crop.png",90,0],["609","Radish Salad","Culinária","cooking/Radish Salad.png",300,0],["484","Radish Seeds","Sementes & Mudas","crops/radish/seed.png",20,0],["Rain Totem","Rain Totem","Criação (Crafting)","craftable/consumables/Rain Totem.png",-1,0],["394","Rainbow Shell","Forrageamento","forageables/Rainbow Shell.png",300,0],["138","Rainbow Trout","Peixes","fish/Rainbow Trout.png",65,0],["Raisins","Raisins","Produtos Artesanais","artisan-goods/Raisins.png",600,0],["108","Rare Disc","Artefatos","artifacts/Rare Disc.png",300,0],["347","Rare Seed","Sementes & Mudas","crops/sweet-gem-berry/seed.png",200,0],["110","Rarecrow 1","Itens Especiais","scarecrows/Rarecrow 1.png",-1,0],["113","Rarecrow 2","Itens Especiais","scarecrows/Rarecrow 2.png",-1,0],["126","Rarecrow 3","Itens Especiais","scarecrows/Rarecrow 3.png",-1,0],["136","Rarecrow 4","Itens Especiais","scarecrows/Rarecrow 4.png",-1,0],["137","Rarecrow 5","Itens Especiais","scarecrows/Rarecrow 5.png",-1,0],["138","Rarecrow 6","Itens Especiais","scarecrows/Rarecrow 6.png",-1,0],["139","Rarecrow 7","Itens Especiais","scarecrows/Rarecrow 7.png",-1,0],["140","Rarecrow 8","Itens Especiais","scarecrows/Rarecrow 8.png",-1,0],["Recycling Machine","Recycling Machine","Criação (Crafting)","craftable/refining-equipment/Recycling Machine.png",-1,0],["266","Red Cabbage","Culturas & Fazenda","crops/red-cabbage/crop.png",260,0],["485","Red Cabbage Seeds","Sementes & Mudas","crops/red-cabbage/seed.png",50,0],["38","Red Cowboy Hat","Chapéus","hats/Red Cowboy Hat.png",-1,0],["RedFez","Red Fez","Chapéus","hats/Red Fez.png",-1,0],["146","Red Mullet","Peixes","fish/Red Mullet.png",75,0],["420","Red Mushroom","Forrageamento","forageables/Red Mushroom.png",75,0],["230","Red Plate","Culinária","cooking/Red Plate.png",400,0],["150","Red Snapper","Peixes","fish/Red Snapper.png",50,0],["338","Refined Quartz","Minerais & Gemas","minerals/bars/Refined Quartz.png",50,0],["252","Rhubarb","Culturas & Fazenda","crops/rhubarb/crop.png",220,0],["222","Rhubarb Pie","Culinária","cooking/Rhubarb Pie.png",400,0],["478","Rhubarb Seeds","Sementes & Mudas","crops/rhubarb/seed.png",50,0],["232","Rice Pudding","Culinária","cooking/Rice Pudding.png",260,0],["273","Rice Shoot","Sementes & Mudas","crops/unmilled-rice/seed.png",20,0],["Ring of Yoba","Ring of Yoba","Criação (Crafting)","rings/Ring of Yoba.png",750,0],["RiverJelly","River Jelly","Peixes","fish/jelly/River Jelly.png",125,0],["607","Roasted Hazelnuts","Culinária","cooking/Roasted Hazelnuts.png",270,0],["rock","Rock","Minerais & Gemas","minerals/nodes/Rock 1.png",-1,0],["Rock Crab","Rock Crab","Outros Itens","monsters/Rock Crab.png",-1,0],["812","Roe","Forrageamento","forageables/Roe.png",30,0],["244","Roots Platter","Culinária","cooking/Roots Platter.png",100,0],["Royal Serpent","Royal Serpent","Outros Itens","monsters/Royal Serpent.png",-1,0],["505","Rubber Boots","Calçados","footwear/Rubber Boots.png",50,0],["64","Ruby","Minerais & Gemas","minerals/gems/Ruby.png",250,0],["ruby-node","Ruby Node","Minerais & Gemas","minerals/nodes/Ruby Node.png",-1,0],["534","Ruby Ring","Anéis","rings/Ruby Ring.png",300,0],["Rustic Plank Floor","Rustic Plank Floor","Criação (Crafting)","craftable/decor/Rustic Plank Floor.png",-1,0],["112","Rusty Cog","Artefatos","artifacts/Rusty Cog.png",25,0],["RustyKey","Rusty Key","Itens Especiais","special-items/Rusty Key.png",-1,0],["110","Rusty Spoon","Artefatos","artifacts/Rusty Spoon.png",25,0],["111","Rusty Spur","Artefatos","artifacts/Rusty Spur.png",25,0],["0","Rusty Sword","Armas","weapons/swords/Rusty Sword.png",50,0],["17","Sailor's Cap","Chapéus","hats/Sailor's Cap.png",1000,0],["196","Salad","Culinária","cooking/Salad.png",110,0],["139","Salmon","Peixes","fish/Salmon.png",75,0],["212","Salmon Dinner","Culinária","cooking/Salmon Dinner.png",300,0],["296","Salmonberry","Forrageamento","forageables/Salmonberry.png",5,0],["30","Sam's Old Guitar","Armas","weapons/clubs/Sam's Old Guitar.png",350,0],["164","Sandfish","Peixes","fish/Sandfish.png",75,0],["568","Sandstone","Minerais & Gemas","minerals/geode-minerals/Sandstone.png",60,0],["25","Santa Hat","Chapéus","hats/Santa Hat.png",2000,0],["92","Sap","Forrageamento","forageables/Sap.png",2,0],["131","Sardine","Peixes","fish/Sardine.png",40,0],["227","Sashimi","Culinária","cooking/Sashimi.png",75,0],["523","Savage Ring","Anéis","rings/Savage Ring.png",750,0],["Scarecrow","Scarecrow","Criação (Crafting)","scarecrows/Scarecrow.png",-1,0],["165","Scorpion Carp","Peixes","fish/Scorpion Carp.png",150,0],["scythe","Scythe","Ferramentas","tools/Scythe.png",-1,0],["154","Sea Cucumber","Peixes","fish/Sea Cucumber.png",75,0],["SeaJelly","Sea Jelly","Peixes","fish/jelly/Sea Jelly.png",200,0],["397","Sea Urchin","Forrageamento","forageables/Sea Urchin.png",160,0],["265","Seafoam Pudding","Culinária","cooking/Seafoam Pudding.png",300,0],["152","Seaweed","Peixes","fish/Seaweed.png",20,0],["41","Seb's Lost Mace","Armas","weapons/clubs/Seb's Lost Mace.png",350,0],["Seed Maker","Seed Maker","Criação (Crafting)","craftable/refining-equipment/Seed Maker.png",-1,0],["Serpent","Serpent","Outros Itens","monsters/Serpent.png",-1,0],["706","Shad","Peixes","fish/Shad.png",60,0],["Shadow Brute","Shadow Brute","Outros Itens","monsters/Shadow Brute.png",-1,0],["19","Shadow Dagger","Armas","weapons/daggers/Shadow Dagger.png",200,0],["Shadow Shaman","Shadow Shaman","Outros Itens","monsters/Shadow Shaman.png",-1,0],["Shadow Sniper","Shadow Sniper","Outros Itens","monsters/Shadow Sniper.png",-1,0],["shears","Shears","Ferramentas","tools/Shears.png",-1,0],["sheep","Sheep","Outros Itens","animals/Sheep.png",-1,0],["720","Shrimp","Peixes","fish/Shrimp.png",60,0],["733","Shrimp Cocktail","Culinária","cooking/Shrimp Cocktail.png",160,0],["1","Silver Saber","Armas","weapons/swords/Silver Saber.png",100,0],["582","Skeletal Hand","Artefatos","artifacts/Skeletal Hand.png",100,0],["585","Skeletal Tail","Artefatos","artifacts/Skeletal Tail.png",100,0],["Skeleton","Skeleton","Outros Itens","monsters/Skeleton.png",-1,0],["Skeleton Mage","Skeleton Mage","Outros Itens","monsters/Skeleton Mage.png",-1,0],["8","Skeleton Mask","Chapéus","hats/Skeleton Mask.png",-1,0],["Skull Brazier","Skull Brazier","Criação (Crafting)","craftable/lighting/Skull Brazier.png",-1,0],["SkullKey","Skull Key","Itens Especiais","special-items/Skull Key.png",-1,0],["576","Slate","Minerais & Gemas","minerals/geode-minerals/Slate.png",85,0],["766","Slime","Espólios de Monstros","monsters/monster-loot/Slime.png",5,0],["520","Slime Charmer Ring","Anéis","rings/Slime Charmer Ring.png",350,0],["Slime Egg-Press","Slime Egg-Press","Criação (Crafting)","craftable/refining-equipment/Slime Egg-Press.png",-1,0],["Slime Incubator","Slime Incubator","Criação (Crafting)","craftable/refining-equipment/Slime Incubator.png",-1,0],["796","Slimejack","Peixes","fish/Slimejack.png",100,0],["32","Slingshot","Armas","weapons/slingshots/Slingshot.png",50,0],["79","Small Cap","Chapéus","hats/Small Cap.png",-1,0],["516","Small Glow Ring","Anéis","rings/Small Glow Ring.png",50,0],["518","Small Magnet Ring","Anéis","rings/Small Magnet Ring.png",50,0],["137","Smallmouth Bass","Peixes","fish/Smallmouth Bass.png",50,0],["SmokedFish","Smoked Fish","Produtos Artesanais","artisan-goods/Smoked Fish.png",-1,0],["721","Snail","Peixes","fish/Snail.png",65,0],["504","Sneakers","Calçados","footwear/Sneakers.png",50,0],["416","Snow Yam","Forrageamento","forageables/Snow Yam.png",100,0],["572","Soapstone","Minerais & Gemas","minerals/geode-minerals/Soapstone.png",120,0],["768","Solar Essence","Espólios de Monstros","monsters/monster-loot/Solar Essence.png",40,0],["Solar Panel","Solar Panel","Criação (Crafting)","craftable/refining-equipment/Solar Panel.png",-1,0],["3","Sombrero","Chapéus","hats/Sombrero.png",25000,0],["898","Son of Crimsonfish","Peixes","fish/Son of Crimsonfish.png",1500,0],["Sonar Bobber","Sonar Bobber","Criação (Crafting)","fish/tackle/Sonar Bobber.png",250,0],["28","Sou'wester","Chapéus","hats/Sou'wester.png",1000,0],["862","Soul Sapper Ring","Anéis","rings/Soul Sapper Ring.png",100,0],["514","Space Boots","Calçados","footwear/Space Boots.png",400,0],["SpaceHelmet","Space Helmet","Chapéus","hats/Space Helmet.png",20000,0],["224","Spaghetti","Culinária","cooking/Spaghetti.png",120,0],["455","Spangle Seeds","Sementes & Mudas","crops/summer-spangle/seed.png",25,0],["SpecialCharm","Special Charm","Itens Especiais","special-items/Special Charm.png",-1,0],["SpecificBait","Specific Bait","Iscas & Anzóis","fish/bait/Pink Bait.png",5,0],["Speed-Gro","Speed-Gro","Criação (Crafting)","craftable/fertilizer/Speed-Gro.png",-1,0],["396","Spice Berry","Forrageamento","forageables/Spice Berry.png",80,0],["226","Spicy Eel","Culinária","cooking/Spicy Eel.png",175,0],["Spider","Spider","Outros Itens","monsters/Spider.png",-1,0],["Spinner","Spinner","Criação (Crafting)","fish/tackle/Spinner.png",250,0],["799","Spook Fish","Peixes","fish/Spook Fish.png",220,0],["SportsCap","Sports Cap","Chapéus","hats/Sports Cap.png",1000,0],["52","Spotted Headscarf","Chapéus","hats/Spotted Headscarf.png",-1,0],["399","Spring Onion","Forrageamento","forageables/Spring Onion.png",8,0],["SpringOnionMastery","Spring Onion Mastery","Itens Especiais","special-items/Spring Onion Mastery.png",-1,0],["Sprinkler","Sprinkler","Criação (Crafting)","craftable/sprinklers/Sprinkler.png",-1,0],["151","Squid","Peixes","fish/Squid.png",80,0],["SquidHat","Squid Hat","Chapéus","hats/Squid Hat.png",-1,0],["814","Squid Ink","Forrageamento","forageables/Squid Ink.png",110,0],["921","Squid Ink Ravioli","Culinária","cooking/Squid Ink Ravioli.png",150,0],["Squid Kid","Squid Kid","Outros Itens","monsters/Squid Kid.png",-1,0],["51","Squire's Helmet","Chapéus","hats/Squire's Helmet.png",-1,0],["Staircase","Staircase","Criação (Crafting)","craftable/misc/Staircase.png",-1,0],["87","Star Helmet","Chapéus","hats/Star Helmet.png",-1,0],["578","Star Shards","Minerais & Gemas","minerals/geode-minerals/Star Shards.png",500,0],["StardewValleyAlmanac","Stardew Valley Almanac","Itens Especiais","special-items/Stardew Valley Almanac.png",-1,0],["268","Starfruit","Culturas & Fazenda","crops/starfruit/crop.png",750,0],["486","Starfruit Seeds","Sementes & Mudas","crops/starfruit/seed.png",200,0],["Statue Of Blessings","Statue Of Blessings","Criação (Crafting)","craftable/misc/Statue Of Blessings.png",-1,0],["Statue Of The Dwarf King","Statue Of The Dwarf King","Criação (Crafting)","craftable/misc/Statue Of The Dwarf King.png",-1,0],["50","Steel Falchion","Armas","weapons/swords/Steel Falchion.png",400,0],["steel-pan-hat","Steel Pan (hat)","Chapéus","hats/Steel Pan (hat).png",-1,0],["11","Steel Smallsword","Armas","weapons/swords/Steel Smallsword.png",50,0],["Stepping Stone Path","Stepping Stone Path","Criação (Crafting)","craftable/decor/Stepping Stone Path.png",-1,0],["Stick Bug","Stick Bug","Outros Itens","monsters/Stick Bug.png",-1,0],["836","Stingray","Peixes","fish/Stingray.png",180,0],["606","Stir Fry","Culinária","cooking/Stir Fry.png",335,0],["390","Stone","Forrageamento","forageables/Stone.png",2,0],["Stone Brazier","Stone Brazier","Criação (Crafting)","craftable/lighting/Stone Brazier.png",-1,0],["Stone Chest","Stone Chest","Criação (Crafting)","craftable/storage/Stone Chest.png",-1,0],["Stone Fence","Stone Fence","Criação (Crafting)","craftable/fences/Stone Fence.png",-1,0],["Stone Floor","Stone Floor","Criação (Crafting)","craftable/decor/Stone Floor.png",-1,0],["Stone Golem","Stone Golem","Outros Itens","monsters/Stone Golem.png",-1,0],["stone-node","Stone Node","Minerais & Gemas","minerals/nodes/Stone 1.png",-1,0],["Stone Sign","Stone Sign","Criação (Crafting)","craftable/signs/Stone Sign.png",-1,0],["Stone Walkway Floor","Stone Walkway Floor","Criação (Crafting)","craftable/decor/Stone Walkway Floor.png",-1,0],["158","Stonefish","Peixes","fish/Stonefish.png",300,0],["203","Strange Bun","Culinária","cooking/Strange Bun.png",225,0],["126","Strange Doll (green)","Artefatos","artifacts/Strange Doll (green).png",1000,0],["127","Strange Doll (yellow)","Artefatos","artifacts/Strange Doll (yellow).png",1000,0],["Straw Floor","Straw Floor","Criação (Crafting)","craftable/decor/Straw Floor.png",-1,0],["4","Straw Hat","Chapéus","hats/Straw Hat.png",1000,0],["400","Strawberry","Culturas & Fazenda","crops/strawberry/crop.png",120,0],["745","Strawberry Seeds","Sementes & Mudas","crops/strawberry/seed.png",0,0],["239","Stuffing","Culinária","cooking/Stuffing.png",165,0],["Stump Brazier","Stump Brazier","Criação (Crafting)","craftable/lighting/Stump Brazier.png",-1,0],["Sturdy Ring","Sturdy Ring","Criação (Crafting)","rings/Sturdy Ring.png",750,0],["698","Sturgeon","Peixes","fish/Sturgeon.png",200,0],["812S","Sturgeon Roe","Forrageamento","forageables/Sturgeon Roe.png",130,0],["593","Summer Spangle","Culturas & Fazenda","crops/summer-spangle/crop.png",90,0],["SummerSquash","Summer Squash","Culturas & Fazenda","crops/summer-squash/crop.png",45,0],["SummerSquashSeeds","Summer Squash Seeds","Sementes & Mudas","crops/summer-squash/seed.png",20,0],["145","Sunfish","Peixes","fish/Sunfish.png",30,0],["421","Sunflower","Culturas & Fazenda","crops/sunflower/crop.png",80,0],["431","Sunflower Seeds","Sementes & Mudas","crops/sunflower/seed.png",20,0],["88","Sunglasses","Chapéus","hats/Sunglasses.png",-1,0],["155","Super Cucumber","Peixes","fish/Super Cucumber.png",250,0],["237","Super Meal","Culinária","cooking/Super Meal.png",220,0],["241","Survival Burger","Culinária","cooking/Survival Burger.png",180,0],["85","Swashbuckler Hat","Chapéus","hats/Swashbuckler Hat.png",-1,0],["417","Sweet Gem Berry","Culturas & Fazenda","crops/sweet-gem-berry/crop.png",3000,0],["402","Sweet Pea","Forrageamento","forageables/Sweet Pea.png",50,0],["Tapper","Tapper","Criação (Crafting)","craftable/refining-equipment/Tapper.png",-1,0],["830","Taro Root","Culturas & Fazenda","crops/taro-root/crop.png",100,0],["831","Taro Tuber","Sementes & Mudas","crops/taro-root/seed.png",20,0],["815","Tea Leaves","Culturas & Fazenda","crops/tea-leaves/crop.png",50,0],["Tea Sapling","Tea Sapling","Criação (Crafting)","crops/tea-leaves/seed.png",250,0],["52","Tempered Broadsword","Armas","weapons/swords/Tempered Broadsword.png",350,0],["7","Templar's Blade","Armas","weapons/swords/Templar's Blade.png",250,0],["Tent Kit","Tent Kit","Criação (Crafting)","craftable/misc/Tent Kit.png",-1,0],["Text Sign","Text Sign","Criação (Crafting)","craftable/signs/Text Sign.png",-1,0],["Trash","The Alleyway Buffet","Itens Especiais","special-items/The Alleyway Buffet.png",-1,0],["Crabbing","The Art O' Crabbing","Itens Especiais","special-items/The Art O' Crabbing.png",-1,0],["Diamonds","The Diamond Hunter","Itens Especiais","special-items/The Diamond Hunter.png",-1,0],["28","The Slammer","Armas","weapons/clubs/The Slammer.png",350,0],["510","Thermal Boots","Calçados","footwear/Thermal Boots.png",150,0],["Thorns Ring","Thorns Ring","Criação (Crafting)","rings/Thorns Ring.png",100,0],["558","Thunder Egg","Minerais & Gemas","minerals/geode-minerals/Thunder Egg.png",100,0],["26","Tiara","Chapéus","hats/Tiara.png",2000,0],["91","Tiger Hat","Chapéus","hats/Tiger Hat.png",-1,0],["Tiger Slime","Tiger Slime","Outros Itens","monsters/Tiger Slime.png",-1,0],["699","Tiger Trout","Peixes","fish/Tiger Trout.png",150,0],["562","Tigerseye","Minerais & Gemas","minerals/geode-minerals/Tigerseye.png",275,0],["701","Tilapia","Peixes","fish/Tilapia.png",75,0],["218","Tom Kha Soup","Culinária","cooking/Tom Kha Soup.png",250,0],["256","Tomato","Culturas & Fazenda","crops/tomato/crop.png",60,0],["480","Tomato Seeds","Sementes & Mudas","crops/tomato/seed.png",25,0],["2","Top Hat","Chapéus","hats/Top Hat.png",-1,0],["68","Topaz","Minerais & Gemas","minerals/gems/Topaz.png",80,0],["topaz-node","Topaz Node","Minerais & Gemas","minerals/nodes/Topaz Node.png",-1,0],["530","Topaz Ring","Anéis","rings/Topaz Ring.png",100,0],["Torch","Torch","Criação (Crafting)","craftable/lighting/Torch.png",-1,0],["229","Tortilla","Culinária","cooking/Tortilla.png",50,0],["44","Totem Mask","Chapéus","hats/Totem Mask.png",-1,0],["fishing-rod","Training Rod","Ferramentas","tools/fishing-rod/Training Rod.png",-1,0],["Transmute (Au)","Transmute (Au)","Criação (Crafting)","minerals/bars/Gold Bar.png",-1,0],["Transmute (Fe)","Transmute (Fe)","Criação (Crafting)","minerals/bars/Iron Bar.png",-1,0],["Trap Bobber","Trap Bobber","Criação (Crafting)","fish/tackle/Trap Bobber.png",200,0],["trash-can","Trash Can","Ferramentas","",-1,0],["Artifact","Treasure Appraisal Guide","Itens Especiais","special-items/Treasure Appraisal Guide.png",-1,0],["Treasure Hunter","Treasure Hunter","Criação (Crafting)","fish/tackle/Treasure Hunter.png",250,0],["Treasure Totem","Treasure Totem","Criação (Crafting)","craftable/consumables/Treasure Totem.png",-1,0],["Tree Fertilizer","Tree Fertilizer","Criação (Crafting)","craftable/fertilizer/Tree Fertilizer.png",-1,0],["TricornHat","Tricorn Hat","Chapéus","hats/Tricorn Hat.png",-1,0],["589","Trilobite","Artefatos","artifacts/Trilobite.png",50,0],["253","Triple Shot Espresso","Culinária","cooking/Triple Shot Espresso.png",450,0],["907","Tropical Curry","Culinária","cooking/Tropical Curry.png",500,0],["13","Tropiclip","Chapéus","hats/Tropiclip.png",1000,0],["219","Trout Soup","Culinária","cooking/Trout Soup.png",100,0],["16","Trucker Hat","Chapéus","hats/Trucker Hat.png",2000,0],["430","Truffle","Produtos Animais","animals/produce/Truffle.png",625,0],["Truffle Crab","Truffle Crab","Outros Itens","monsters/Truffle Crab.png",-1,0],["432","Truffle Oil","Produtos Artesanais","artisan-goods/Truffle Oil.png",1065,0],["Tub o' Flowers","Tub o' Flowers","Criação (Crafting)","craftable/furniture/Tub o' Flowers.png",-1,0],["591","Tulip","Culturas & Fazenda","crops/tulip/crop.png",30,0],["427","Tulip Bulb","Sementes & Mudas","crops/tulip/seed.png",10,0],["130","Tuna","Peixes","fish/Tuna.png",100,0],["509","Tundra Boots","Calçados","footwear/Tundra Boots.png",150,0],["turtle","Turtle","Outros Itens","animals/Turtle.png",-1,0],["271","Unmilled Rice","Culturas & Fazenda","crops/unmilled-rice/crop.png",30,0],["522","Vampire Ring","Anéis","rings/Vampire Ring.png",750,0],["200","Vegetable Medley","Culinária","cooking/Vegetable Medley.png",120,0],["419","Vinegar","Produtos Artesanais","artisan-goods/Vinegar.png",100,0],["void-chicken","Void Chicken","Outros Itens","animals/Void Chicken.png",-1,0],["305","Void Egg","Produtos Animais","animals/produce/Void Egg.png",65,0],["769","Void Essence","Espólios de Monstros","monsters/monster-loot/Void Essence.png",50,0],["308","Void Mayonnaise","Produtos Artesanais","artisan-goods/Void Mayonnaise.png",275,0],["795","Void Salmon","Peixes","fish/Void Salmon.png",150,0],["140","Walleye","Peixes","fish/Walleye.png",105,0],["Warp Totem: Beach","Warp Totem: Beach","Criação (Crafting)","craftable/consumables/Warp Totem Beach.png",-1,0],["Warp Totem: Desert","Warp Totem: Desert","Criação (Crafting)","craftable/consumables/Warp Totem Desert.png",-1,0],["Warp Totem: Farm","Warp Totem: Farm","Criação (Crafting)","craftable/consumables/Warp Totem Farm.png",-1,0],["Warp Totem: Island","Warp Totem: Island","Criação (Crafting)","craftable/consumables/Warp Totem Island.png",-1,0],["Warp Totem: Mountains","Warp Totem: Mountains","Criação (Crafting)","craftable/consumables/Warp Totem Mountains.png",-1,0],["93","Warrior Helmet","Chapéus","hats/Warrior Helmet.png",-1,0],["Warrior Ring","Warrior Ring","Criação (Crafting)","rings/Warrior Ring.png",750,0],["watering-can","Watering Can","Ferramentas","",-1,0],["30","Watermelon Band","Chapéus","hats/Watermelon Band.png",1000,0],["Speed","Way Of The Wind pt. 1","Itens Especiais","special-items/Way Of The Wind pt. 1.png",-1,0],["Speed2","Way Of The Wind pt. 2","Itens Especiais","special-items/Way Of The Wind pt. 2.png",-1,0],["WildSeeds","Ways Of The Wild","Itens Especiais","special-items/Ways Of The Wild.png",-1,0],["46","Wearable Dwarf Helm","Chapéus","hats/Wearable Dwarf Helm.png",-1,0],["Weathered Floor","Weathered Floor","Criação (Crafting)","craftable/decor/Weathered Floor.png",-1,0],["Wedding Ring","Wedding Ring","Criação (Crafting)","rings/Wedding Ring.png",1000,0],["262","Wheat","Culturas & Fazenda","crops/wheat/crop.png",25,0],["483","Wheat Seeds","Sementes & Mudas","crops/wheat/seed.png",5,0],["157","White Algae","Peixes","fish/White Algae.png",25,0],["WhiteBow","White Bow","Chapéus","hats/White Bow.png",5000,0],["white-chicken","White Chicken","Outros Itens","animals/White Chicken.png",-1,0],["white-cow","White Cow","Outros Itens","animals/White Cow.png",-1,0],["65","White Turban","Chapéus","hats/White Turban.png",-1,0],["45","Wicked Kris","Armas","weapons/daggers/Wicked Kris.png",400,0],["Wicked Statue","Wicked Statue","Criação (Crafting)","craftable/furniture/Wicked Statue.png",-1,0],["Wild Bait","Wild Bait","Criação (Crafting)","fish/bait/Wild Bait.png",15,0],["16","Wild Horseradish","Forrageamento","forageables/Wild Horseradish.png",50,0],["406","Wild Plum","Forrageamento","forageables/Wild Plum.png",80,0],["Wild Seeds (Fa)","Wild Seeds (Fa)","Criação (Crafting)","craftable/seeds/Fall Seeds.png",-1,0],["Wild Seeds (Sp)","Wild Seeds (Sp)","Criação (Crafting)","craftable/seeds/Spring Seeds.png",-1,0],["Wild Seeds (Su)","Wild Seeds (Su)","Criação (Crafting)","craftable/seeds/Summer Seeds.png",-1,0],["Wild Seeds (Wi)","Wild Seeds (Wi)","Criação (Crafting)","craftable/seeds/Winter Seeds.png",-1,0],["Wilderness Golem","Wilderness Golem","Outros Itens","monsters/Wilderness Golem.png",-1,0],["22","Wind Spire","Armas","weapons/daggers/Wind Spire.png",50,0],["348","Wine","Produtos Artesanais","artisan-goods/Wine.png",-1,0],["412","Winter Root","Forrageamento","forageables/Winter Root.png",70,0],["70","Witch Hat","Chapéus","hats/Witch Hat.png",-1,0],["388","Wood","Forrageamento","forageables/Wood.png",2,0],["24","Wood Club","Armas","weapons/clubs/Wood Club.png",100,0],["Wood Fence","Wood Fence","Criação (Crafting)","craftable/fences/Wood Fence.png",-1,0],["Wood Floor","Wood Floor","Criação (Crafting)","craftable/decor/Wood Floor.png",-1,0],["Wood Lamp-post","Wood Lamp-post","Criação (Crafting)","craftable/lighting/Wood Lamp-post.png",-1,0],["27","Wood Mallet","Armas","weapons/clubs/Wood Mallet.png",150,0],["Wood Path","Wood Path","Criação (Crafting)","craftable/decor/Wood Path.png",-1,0],["Wood Sign","Wood Sign","Criação (Crafting)","craftable/signs/Wood Sign.png",-1,0],["WoodcuttersWeekly","Woodcutter's Weekly","Itens Especiais","special-items/Woodcutter's Weekly.png",-1,0],["12","Wooden Blade","Armas","weapons/swords/Wooden Blade.png",50,0],["Wooden Brazier","Wooden Brazier","Criação (Crafting)","craftable/lighting/Wooden Brazier.png",-1,0],["734","Woodskip","Peixes","fish/Woodskip.png",75,0],["Woodcutting","Woody's Secret","Itens Especiais","special-items/Woody's Secret.png",-1,0],["440","Wool","Produtos Animais","animals/produce/Wool.png",340,0],["507","Work Boots","Calçados","footwear/Work Boots.png",100,0],["Worm Bin","Worm Bin","Criação (Crafting)","craftable/refining-equipment/Worm Bin.png",-1,0],["280","Yam","Culturas & Fazenda","crops/yam/crop.png",160,0],["492","Yam Seeds","Sementes & Mudas","crops/yam/seed.png",30,0],["48","Yeti Tooth","Armas","weapons/swords/Yeti Tooth.png",350,0]];
+  </script>
+
+  <!-- Main Application Script -->
+  <script>
+    // State management
+    const state = {
+      catalog: [],
+      playerData: null,
+      playerItemsMap: new Map(),
+      activeCategory: null,
+      activeStatus: 'missing',
+      activeScope: 'all',
+      searchQuery: '',
+      sortMode: 'name-asc'
+    };
+
+    function initCatalog() {
+      state.catalog = RAW_CATALOG.map(function(entry) {
+        return {
+          id: String(entry[0] || ''),
+          name: entry[1],
+          category: entry[2],
+          image: entry[3] || '',
+          sellPrice: entry[4] === -1 ? null : entry[4],
+          isCollection: Boolean(entry[5])
+        };
+      });
+    }
+
+    function getItemImageUrl(relPath) {
+      if (!relPath) return 'https://cdn.jsdelivr.net/npm/stardew-valley-data@1.1.1/images/crops/parsnip/crop.png';
+      if (relPath.startsWith('http')) return relPath;
+      const clean = relPath.replace(/^images\//, '');
+      return 'https://cdn.jsdelivr.net/npm/stardew-valley-data@1.1.1/images/' + clean;
+    }
+
+    function showToast(msg) {
+      const $toast = $('#toast');
+      $toast.text(msg).fadeIn(200);
+      setTimeout(function() { $toast.fadeOut(400); }, 2500);
+    }
+
+    function parseSaveXML(xmlString) {
+      const nameMatch = xmlString.match(/<player>[\s\S]*?<name>([^<]+)<\/name>/);
+      const farmNameMatch = xmlString.match(/<farmName>([^<]+)<\/farmName>/);
+      const moneyMatch = xmlString.match(/<money>([^<]+)<\/money>/);
+      const seasonMatch = xmlString.match(/<currentSeason>([^<]+)<\/currentSeason>/);
+      const dayMatch = xmlString.match(/<dayOfMonth>([^<]+)<\/dayOfMonth>/);
+      const yearMatch = xmlString.match(/<year>([^<]+)<\/year>/);
+      const versionMatch = xmlString.match(/<gameVersion>([^<]+)<\/gameVersion>/);
+
+      const seasonMap = {
+        spring: 'Primavera',
+        summer: 'Verão',
+        fall: 'Outono',
+        winter: 'Inverno'
+      };
+
+      const rawSeason = (seasonMatch ? seasonMatch[1] : '').toLowerCase();
+      const seasonName = seasonMap[rawSeason] || (seasonMatch ? seasonMatch[1] : 'Desconhecida');
+
+      const player = {
+        name: nameMatch ? nameMatch[1] : 'Fazendeiro',
+        farmName: farmNameMatch ? farmNameMatch[1] : 'Fazenda',
+        money: moneyMatch ? parseInt(moneyMatch[1], 10) : 0,
+        season: seasonName,
+        day: dayMatch ? parseInt(dayMatch[1], 10) : 1,
+        year: yearMatch ? parseInt(yearMatch[1], 10) : 1,
+        version: versionMatch ? versionMatch[1] : '1.6'
+      };
+
+      const inventoryMap = new Map();
+      let totalContainers = 0;
+      let totalStoredUnits = 0;
+
+      function recordItem(name, stack, quality, location, isInv) {
+        if (!name || name === 'Error Item') return;
+        const key = name.trim().toLowerCase();
+        const qty = parseInt(stack, 10) || 1;
+        const q = parseInt(quality, 10) || 0;
+
+        totalStoredUnits += qty;
+
+        let entry = inventoryMap.get(key);
+        if (!entry) {
+          entry = {
+            name: name.trim(),
+            totalQuantity: 0,
+            inInventory: 0,
+            inChests: 0,
+            locations: []
+          };
+          inventoryMap.set(key, entry);
+        }
+
+        entry.totalQuantity += qty;
+        if (isInv) entry.inInventory += qty;
+        else entry.inChests += qty;
+
+        const locMatch = entry.locations.find(function(l) { return l.location === location; });
+        if (locMatch) {
+          locMatch.quantity += qty;
+        } else {
+          entry.locations.push({ location: location, quantity: qty, quality: q });
+        }
+      }
+
+      // 1. Player Inventory
+      const playerBlock = xmlString.match(/<player>[\s\S]*?<items>([\s\S]*?)<\/items>/);
+      if (playerBlock) {
+        const itemTags = playerBlock[1].match(/<Item[\s\S]*?<\/Item>/g) || [];
+        for (let i = 0; i < itemTags.length; i++) {
+          const tag = itemTags[i];
+          const nm = tag.match(/<name>([^<]+)<\/name>/);
+          const sm = tag.match(/<stack>([^<]+)<\/stack>/);
+          const qm = tag.match(/<quality>([^<]+)<\/quality>/);
+          if (nm && nm[1]) {
+            recordItem(nm[1], sm ? sm[1] : 1, qm ? qm[1] : 0, 'Inventário do Jogador', true);
+          }
+        }
+      }
+
+      // 2. Equipped items
+      const eqFields = [
+        { tag: 'hat', label: 'Equipado: Chapéu' },
+        { tag: 'boots', label: 'Equipado: Botas' },
+        { tag: 'leftRing', label: 'Equipado: Anel Esquerdo' },
+        { tag: 'rightRing', label: 'Equipado: Anel Direito' },
+        { tag: 'trinketItem', label: 'Equipado: Bugiganga' }
+      ];
+      for (let i = 0; i < eqFields.length; i++) {
+        const eq = eqFields[i];
+        const m = xmlString.match(new RegExp('<' + eq.tag + '>[\\s\\S]*?<name>([^<]+)<\\/name>[\\s\\S]*?<\\/' + eq.tag + '>'));
+        if (m && m[1] && m[1] !== 'Error Item') {
+          recordItem(m[1], 1, 0, eq.label, true);
+        }
+      }
+
+      // 3. GameLocations scan
+      const locationNamesPt = {
+        Farm: 'Fazenda',
+        FarmHouse: 'Casa da Fazenda',
+        Beach: 'Praia',
+        Mine: 'Mina',
+        SkullCave: 'Caverna da Caveira',
+        Woods: 'Bosque Secreto',
+        Desert: 'Deserto Calico',
+        Forest: 'Floresta Cinzaseiva',
+        Mountain: 'Montanha',
+        Town: 'Vila Pelicanos',
+        IslandWest: 'Ilha Gengibre (Oeste)',
+        IslandSouth: 'Ilha Gengibre (Sul)',
+        IslandNorth: 'Ilha Gengibre (Norte)',
+        IslandEast: 'Ilha Gengibre (Leste)',
+        IslandFarmHouse: 'Casa da Ilha'
+      };
+
+      const locRegex = /<GameLocation[^>]*>([\s\S]*?)<\/GameLocation>/g;
+      let locM;
+
+      function parseItemsBlock(itemsXml, containerDesc) {
+        totalContainers++;
+        const itemTags = itemsXml.match(/<Item[\s\S]*?<\/Item>/g) || [];
+        for (let i = 0; i < itemTags.length; i++) {
+          const it = itemTags[i];
+          const nm = it.match(/<name>([^<]+)<\/name>/);
+          const sm = it.match(/<stack>([^<]+)<\/stack>/);
+          const qm = it.match(/<quality>([^<]+)<\/quality>/);
+          if (nm && nm[1]) {
+            recordItem(nm[1], sm ? sm[1] : 1, qm ? qm[1] : 0, containerDesc, false);
+          }
+        }
+      }
+
+      function processLocation(subXml, locLabel) {
+        const frM = subXml.match(/<fridge>[\s\S]*?<items>([\s\S]*?)<\/items>/);
+        if (frM) {
+          parseItemsBlock(frM[1], locLabel + ' • Geladeira');
+        }
+
+        const chestRegex = /<Object[^>]*xsi:type="Chest"[^>]*>([\s\S]*?)<\/Object>/g;
+        let cM;
+        while ((cM = chestRegex.exec(subXml)) !== null) {
+          const cXml = cM[1];
+          const itM = cXml.match(/<items>([\s\S]*?)<\/items>/);
+          if (itM) {
+            const nm = cXml.match(/<name>([^<]+)<\/name>/);
+            const xM = cXml.match(/<tileLocation>[\s\S]*?<X>([^<]+)<\/X>/);
+            const yM = cXml.match(/<tileLocation>[\s\S]*?<Y>([^<]+)<\/Y>/);
+            const chestName = nm ? nm[1] : 'Baú';
+            const coord = (xM && yM) ? ' (' + xM[1] + ', ' + yM[1] + ')' : '';
+            parseItemsBlock(itM[1], locLabel + ' • ' + chestName + coord);
+          }
+        }
+
+        const bRegex = /<Building[^>]*>([\s\S]*?)<\/Building>/g;
+        let bM;
+        while ((bM = bRegex.exec(subXml)) !== null) {
+          const bXml = bM[1];
+          const bTypeM = bXml.match(/<buildingType>([^<]+)<\/buildingType>/);
+          const bName = bTypeM ? bTypeM[1] : 'Construção';
+          const inM = bXml.match(/<indoors[^>]*>([\s\S]*?)<\/indoors>/);
+          if (inM) {
+            processLocation(inM[1], locLabel + ' > ' + bName);
+          }
+        }
+      }
+
+      while ((locM = locRegex.exec(xmlString)) !== null) {
+        const lXml = locM[1];
+        const nameM = lXml.match(/<name>([^<]+)<\/name><waterColor>/);
+        const rawLoc = nameM ? nameM[1] : 'Fazenda';
+        const locLabel = locationNamesPt[rawLoc] || rawLoc;
+        processLocation(lXml, locLabel);
+      }
+
+      return {
+        player: player,
+        inventoryMap: inventoryMap,
+        totalContainers: totalContainers,
+        totalStoredUnits: totalStoredUnits
+      };
+    }
+
+    function handleSaveLoaded(xmlText) {
+      try {
+        const parsed = parseSaveXML(xmlText);
+        state.playerData = parsed.player;
+        state.playerItemsMap = parsed.inventoryMap;
+        state.totalContainers = parsed.totalContainers;
+        state.totalStoredUnits = parsed.totalStoredUnits;
+
+        renderDashboard();
+        showToast('Save carregado e analisado com sucesso!');
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 60,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+      } catch (err) {
+        console.error('Error parsing save:', err);
+        alert('Erro ao processar o arquivo de save: ' + err.message);
+      }
+    }
+
+    function renderDashboard() {
+      $('#farmer-dashboard').show();
+
+      $('html, body').animate({
+        scrollTop: $("#farmer-dashboard").offset().top - 80
+      }, 500);
+
+      const p = state.playerData;
+      $('#farmer-name-display').text(p.name);
+      $('#farm-name-display').text('Fazenda ' + p.farmName);
+      $('#farmer-date-display').text(p.season + ' ' + p.day + ', Ano ' + p.year);
+      $('#farmer-gold-display').text(p.money.toLocaleString('pt-BR') + 'g');
+      $('#farmer-chests-display').text(state.totalContainers + ' Baús / Contêineres');
+      $('#farmer-version-display').text(p.version);
+
+      $('#stat-total-stored-qty').text(state.totalStoredUnits.toLocaleString('pt-BR'));
+
+      updateProgressAndCategories();
+      renderItemsGrid();
+    }
+
+    function updateProgressAndCategories() {
+      const activeCatalog = state.activeScope === 'collections'
+        ? state.catalog.filter(function(i) { return i.isCollection; })
+        : state.catalog;
+
+      let ownedCount = 0;
+      let missingCount = 0;
+
+      const catStats = {};
+
+      for (let i = 0; i < activeCatalog.length; i++) {
+        const item = activeCatalog[i];
+        const isOwned = state.playerItemsMap.has(item.name.toLowerCase());
+        if (!catStats[item.category]) {
+          catStats[item.category] = { total: 0, owned: 0, missing: 0 };
+        }
+        catStats[item.category].total++;
+        if (isOwned) {
+          ownedCount++;
+          catStats[item.category].owned++;
+        } else {
+          missingCount++;
+          catStats[item.category].missing++;
+        }
+      }
+
+      const totalItems = activeCatalog.length;
+      const pct = totalItems > 0 ? ((ownedCount / totalItems) * 100).toFixed(1) : 0;
+
+      $('#stat-total-catalog').text(totalItems);
+      $('#stat-owned-count').text(ownedCount);
+      $('#stat-missing-count').text(missingCount);
+      $('#overall-percentage').text(pct + '%');
+      $('#overall-progress-bar').css('width', pct + '%');
+
+      $('#tab-all-count').text(totalItems);
+      $('#tab-owned-count').text(ownedCount);
+      $('#tab-missing-count').text(missingCount);
+
+      const $catGrid = $('#categories-grid');
+      $catGrid.empty();
+
+      const sortedCategories = Object.keys(catStats).sort();
+      for (let i = 0; i < sortedCategories.length; i++) {
+        const cat = sortedCategories[i];
+        const stat = catStats[cat];
+        const catPct = stat.total > 0 ? ((stat.owned / stat.total) * 100).toFixed(0) : 0;
+        const isActive = state.activeCategory === cat ? 'active' : '';
+
+        const cardHtml = '<div class="cat-card ' + isActive + '" data-category="' + cat + '">' +
+          '<div class="cat-card-header">' +
+            '<span class="cat-name">' + cat + '</span>' +
+            '<span class="cat-count">' + stat.owned + '/' + stat.total + '</span>' +
+          '</div>' +
+          '<div class="cat-progress-bg">' +
+            '<div class="cat-progress-fill" style="width:' + catPct + '%"></div>' +
+          '</div>' +
+        '</div>';
+        $catGrid.append(cardHtml);
+      }
+    }
+
+    function getFilteredItems() {
+      let items = state.activeScope === 'collections'
+        ? state.catalog.filter(function(i) { return i.isCollection; })
+        : state.catalog;
+
+      if (state.activeCategory) {
+        items = items.filter(function(i) { return i.category === state.activeCategory; });
+      }
+
+      if (state.searchQuery.trim()) {
+        const q = state.searchQuery.trim().toLowerCase();
+        items = items.filter(function(i) {
+          return i.name.toLowerCase().indexOf(q) !== -1 ||
+                 i.category.toLowerCase().indexOf(q) !== -1 ||
+                 i.id === q;
+        });
+      }
+
+      if (state.activeStatus === 'missing') {
+        items = items.filter(function(i) { return !state.playerItemsMap.has(i.name.toLowerCase()); });
+      } else if (state.activeStatus === 'owned') {
+        items = items.filter(function(i) { return state.playerItemsMap.has(i.name.toLowerCase()); });
+      }
+
+      items.sort(function(a, b) {
+        const aOwned = state.playerItemsMap.has(a.name.toLowerCase());
+        const bOwned = state.playerItemsMap.has(b.name.toLowerCase());
+        const aQty = aOwned ? state.playerItemsMap.get(a.name.toLowerCase()).totalQuantity : 0;
+        const bQty = bOwned ? state.playerItemsMap.get(b.name.toLowerCase()).totalQuantity : 0;
+
+        if (state.sortMode === 'name-asc') return a.name.localeCompare(b.name);
+        if (state.sortMode === 'name-desc') return b.name.localeCompare(a.name);
+        if (state.sortMode === 'category') return a.category.localeCompare(b.category) || a.name.localeCompare(b.name);
+        if (state.sortMode === 'price-desc') return (b.sellPrice || 0) - (a.sellPrice || 0);
+        if (state.sortMode === 'qty-desc') return bQty - aQty || a.name.localeCompare(b.name);
+        return 0;
+      });
+
+      return items;
+    }
+
+    function renderItemsGrid() {
+      const items = getFilteredItems();
+      const $grid = $('#items-grid');
+      $grid.empty();
+
+      if (items.length === 0) {
+        $('#empty-state').show();
+        return;
+      }
+      $('#empty-state').hide();
+
+      const limit = 300;
+      const itemsToRender = items.slice(0, limit);
+
+      for (let i = 0; i < itemsToRender.length; i++) {
+        const item = itemsToRender[i];
+        const isOwned = state.playerItemsMap.has(item.name.toLowerCase());
+        const ownedData = isOwned ? state.playerItemsMap.get(item.name.toLowerCase()) : null;
+
+        const imgUrl = getItemImageUrl(item.image);
+        const cardClass = isOwned ? 'is-owned' : 'is-missing';
+
+        const statusBadge = isOwned
+          ? '<span class="status-badge owned">✅ Coletado (' + ownedData.totalQuantity + 'x)</span>'
+          : '<span class="status-badge missing">❌ Falta Pegar</span>';
+
+        let locationSnippet = '';
+        if (isOwned && ownedData.locations.length > 0) {
+          const firstLoc = ownedData.locations[0];
+          const moreCount = ownedData.locations.length - 1;
+          const moreText = moreCount > 0 ? ' (+' + moreCount + ' locais)' : '';
+          locationSnippet = '<div class="item-locations-tooltip">📍 ' + firstLoc.location + ' (' + firstLoc.quantity + 'x)' + moreText + '</div>';
+        }
+
+        const priceHtml = item.sellPrice
+          ? '<span class="item-price">' + item.sellPrice + 'g</span>'
+          : '<span style="color:#aaa;">-</span>';
+
+        const cardHtml = '<div class="item-card ' + cardClass + '" data-item-name="' + item.name + '">' +
+          '<div class="item-top">' +
+            '<div class="item-icon-box">' +
+              '<img class="item-icon" src="' + imgUrl + '" alt="' + item.name + '" loading="lazy" onerror="this.src=\'https://cdn.jsdelivr.net/npm/stardew-valley-data@1.1.1/images/crops/parsnip/crop.png\'">' +
+            '</div>' +
+            '<div class="item-main-info">' +
+              '<div class="item-name" title="' + item.name + '">' + item.name + '</div>' +
+              '<span class="item-category-tag">' + item.category + '</span>' +
+            '</div>' +
+          '</div>' +
+          locationSnippet +
+          '<div class="item-bottom">' +
+            statusBadge +
+            priceHtml +
+          '</div>' +
+        '</div>';
+
+        $grid.append(cardHtml);
+      }
+
+      if (items.length > limit) {
+        $grid.append('<div style="grid-column: 1 / -1; text-align: center; padding: 16px; color: #795548; font-weight: 700;">' +
+          'Mostrando ' + limit + ' de ' + items.length + ' itens. Refine sua busca ou filtro para ver mais.' +
+        '</div>');
+      }
+    }
+
+    function openItemModal(itemName) {
+      const item = state.catalog.find(function(i) { return i.name.toLowerCase() === itemName.toLowerCase(); });
+      if (!item) return;
+
+      const isOwned = state.playerItemsMap.has(item.name.toLowerCase());
+      const ownedData = isOwned ? state.playerItemsMap.get(item.name.toLowerCase()) : null;
+
+      $('#modal-item-name').text(item.name);
+      $('#modal-title').text(item.name);
+      $('#modal-item-img').attr('src', getItemImageUrl(item.image));
+
+      const badgesHtml = '<span class="status-badge ' + (isOwned ? 'owned' : 'missing') + '" style="margin-right:6px;">' +
+        (isOwned ? '✅ Possuído (' + ownedData.totalQuantity + ' unidades)' : '❌ Falta Coletar') +
+      '</span>' +
+      '<span class="item-category-tag">' + item.category + '</span>' +
+      (item.isCollection ? '<span class="item-category-tag" style="background:#e8f4fd; color:#2980b9;">🏆 Coleção Oficial</span>' : '');
+
+      $('#modal-badges').html(badgesHtml);
+
+      let bodyHtml = '<div style="margin-bottom: 16px; font-size: 0.9rem; line-height: 1.5; color: #4a2e1b;">' +
+        (item.sellPrice ? '<p><strong>Preço de Venda Base:</strong> ' + item.sellPrice + 'g</p>' : '') +
+        (item.id ? '<p><strong>Item ID no Jogo:</strong> <code>' + item.id + '</code></p>' : '') +
+      '</div>';
+
+      if (isOwned && ownedData.locations.length > 0) {
+        bodyHtml += '<h4 style="font-size: 0.95rem; font-weight: 800; color: #3b2616; margin-bottom: 6px;">' +
+          '📦 Onde este item está guardado:' +
+        '</h4>' +
+        '<ul class="locations-list">';
+
+        for (let i = 0; i < ownedData.locations.length; i++) {
+          const loc = ownedData.locations[i];
+          bodyHtml += '<li>' +
+            '<span>📍 <strong>' + loc.location + '</strong></span>' +
+            '<span class="badge-pill" style="color:#27ae60; background:#e8f8f0; border-color:#a2e0be;">' + loc.quantity + 'x</span>' +
+          '</li>';
+        }
+        bodyHtml += '</ul>';
+      } else {
+        bodyHtml += '<div style="background: #fdf0ed; border: 1px solid #f5b7b1; border-radius: 8px; padding: 14px; color: #c0392b; font-size: 0.85rem;">' +
+          '⚠️ <strong>Você ainda não tem este item armazenado!</strong><br>' +
+          'Ele não foi encontrado em nenhum dos seus baús, inventário ou geladeiras.' +
+        '</div>';
+      }
+
+      $('#modal-details-body').html(bodyHtml);
+      $('#item-modal').css('display', 'flex');
+    }
+
+    function copyMissingItems() {
+      const activeCatalog = state.activeScope === 'collections'
+        ? state.catalog.filter(function(i) { return i.isCollection; })
+        : state.catalog;
+
+      const missing = activeCatalog.filter(function(i) { return !state.playerItemsMap.has(i.name.toLowerCase()); });
+      if (missing.length === 0) {
+        showToast('Parabéns! Você tem todos os itens!');
+        return;
+      }
+
+      const byCat = {};
+      for (let i = 0; i < missing.length; i++) {
+        const m = missing[i];
+        if (!byCat[m.category]) byCat[m.category] = [];
+        byCat[m.category].push(m.name);
+      }
+
+      let text = '# Stardew Valley - Itens Faltantes (' + missing.length + ' itens)\n\n';
+      const sortedCats = Object.keys(byCat).sort();
+      for (let i = 0; i < sortedCats.length; i++) {
+        const cat = sortedCats[i];
+        text += '## ' + cat + ' (' + byCat[cat].length + ')\n';
+        const sortedItems = byCat[cat].sort();
+        for (let j = 0; j < sortedItems.length; j++) {
+          text += '- [ ] ' + sortedItems[j] + '\n';
+        }
+        text += '\n';
+      }
+
+      navigator.clipboard.writeText(text).then(function() {
+        showToast('Copiado! ' + missing.length + ' itens faltantes no Clipboard.');
+      }).catch(function(err) {
+        console.error('Clipboard error:', err);
+        showToast('Erro ao copiar para a área de transferência.');
+      });
+    }
+
+    function exportCSV() {
+      const activeCatalog = state.activeScope === 'collections'
+        ? state.catalog.filter(function(i) { return i.isCollection; })
+        : state.catalog;
+
+      let csv = 'Nome,Categoria,Status,Quantidade Total,Locais Onde Guardado,Preco Venda\n';
+
+      for (let i = 0; i < activeCatalog.length; i++) {
+        const item = activeCatalog[i];
+        const isOwned = state.playerItemsMap.has(item.name.toLowerCase());
+        const owned = isOwned ? state.playerItemsMap.get(item.name.toLowerCase()) : null;
+        const status = isOwned ? 'Coletado' : 'Faltando';
+        const qty = isOwned ? owned.totalQuantity : 0;
+        const locs = isOwned ? owned.locations.map(function(l) { return l.location + ' (' + l.quantity + 'x)'; }).join('; ') : '';
+        const price = item.sellPrice || 0;
+
+        csv += '"' + item.name + '","' + item.category + '","' + status + '",' + qty + ',"' + locs + '",' + price + '\n';
+      }
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', 'stardew_all_items_' + (state.playerData ? state.playerData.farmName : 'tracker') + '.csv');
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function loadDemoSave() {
+      const demoUrl = './MiniFazenda_450568833';
+      showToast('Baixando save de exemplo...');
+
+      fetch(demoUrl)
+        .then(function(res) {
+          if (!res.ok) throw new Error('Não foi possível carregar o arquivo: ' + res.statusText);
+          return res.text();
+        })
+        .then(function(xml) {
+          handleSaveLoaded(xml);
+        })
+        .catch(function(err) {
+          console.warn('Fetch demo save failed (possibly file:// protocol):', err);
+          alert('Para testar o save de demonstração MiniFazenda_450568833, selecione o arquivo que está na raiz deste repositório usando o botão "Selecionar Arquivo de Save"!');
+          $('#save-file-input').click();
+        });
+    }
+
+    $(document).ready(function() {
+      initCatalog();
+
+      const $dropzone = $('#dropzone');
+      $dropzone.on('dragover dragenter', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $dropzone.addClass('dragover');
+      });
+
+      $dropzone.on('dragleave dragend drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $dropzone.removeClass('dragover');
+      });
+
+      $dropzone.on('drop', function(e) {
+        const files = e.originalEvent.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            handleSaveLoaded(evt.target.result);
+          };
+          reader.readAsText(file);
+        }
+      });
+
+      $('#save-file-input').on('change', function(e) {
+        if (e.target.files.length > 0) {
+          const file = e.target.files[0];
+          const reader = new FileReader();
+          reader.onload = function(evt) {
+            handleSaveLoaded(evt.target.result);
+          };
+          reader.readAsText(file);
+        }
+      });
+
+      $('#btn-load-demo').on('click', function(e) {
+        e.stopPropagation();
+        loadDemoSave();
+      });
+
+      $('#toggle-help').on('click', function(e) {
+        e.stopPropagation();
+        $('#help-box').slideToggle(200);
+      });
+
+      $('#status-tabs').on('click', '.filter-tab', function() {
+        $('#status-tabs .filter-tab').removeClass('active');
+        $(this).addClass('active');
+        state.activeStatus = $(this).data('status');
+        renderItemsGrid();
+      });
+
+      $('#categories-grid').on('click', '.cat-card', function() {
+        const cat = $(this).data('category');
+        if (state.activeCategory === cat) {
+          state.activeCategory = null;
+        } else {
+          state.activeCategory = cat;
+        }
+        updateProgressAndCategories();
+        renderItemsGrid();
+      });
+
+      $('#btn-reset-cat').on('click', function() {
+        state.activeCategory = null;
+        updateProgressAndCategories();
+        renderItemsGrid();
+      });
+
+      $('#scope-select').on('change', function() {
+        state.activeScope = $(this).val();
+        updateProgressAndCategories();
+        renderItemsGrid();
+      });
+
+      $('#sort-select').on('change', function() {
+        state.sortMode = $(this).val();
+        renderItemsGrid();
+      });
+
+      let searchTimer;
+      $('#search-input').on('input', function() {
+        clearTimeout(searchTimer);
+        const val = $(this).val();
+        searchTimer = setTimeout(function() {
+          state.searchQuery = val;
+          renderItemsGrid();
+        }, 150);
+      });
+
+      $('#items-grid').on('click', '.item-card', function() {
+        const itemName = $(this).data('item-name');
+        openItemModal(itemName);
+      });
+
+      $('#modal-close-btn, .modal-overlay').on('click', function(e) {
+        if (e.target === this) {
+          $('#item-modal').fadeOut(150);
+        }
+      });
+
+      $('#btn-copy-missing').on('click', copyMissingItems);
+      $('#btn-export-csv').on('click', exportCSV);
+    });
+  </script>
+
+</body>
+</html>
